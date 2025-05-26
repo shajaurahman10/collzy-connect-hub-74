@@ -6,14 +6,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, Building2, MapPin, Phone, Globe, Send } from 'lucide-react';
+import { Upload, Building2, MapPin, Phone, Globe, Send, ArrowLeft } from 'lucide-react';
 import Navigation from '@/components/Navigation';
+import CollegePreview from '@/components/CollegePreview';
 import { useToast } from '@/hooks/use-toast';
 import { googleSheetsService } from '@/utils/googleSheets';
 
 const SubmitCollege = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [submittedCollege, setSubmittedCollege] = useState(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -62,28 +65,24 @@ const SubmitCollege = () => {
       });
 
       if (success) {
+        // Set submitted college for preview
+        setSubmittedCollege({
+          name: formData.name,
+          location: formData.location,
+          type: formData.type,
+          description: formData.description,
+          website: formData.website,
+          whatsapp: formData.whatsapp,
+          email: formData.email,
+          rating: 4.5, // Default rating for preview
+          students: 10000 // Default student count for preview
+        });
+        
+        setShowPreview(true);
+        
         toast({
           title: "College Submitted Successfully!",
           description: "Your college submission has been sent for admin review. You'll be notified once it's approved.",
-        });
-        
-        // Reset form
-        setFormData({
-          name: '',
-          location: '',
-          type: '',
-          website: '',
-          phone: '',
-          whatsapp: '',
-          email: '',
-          description: '',
-          programs: '',
-          tuitionFee: '',
-          applicationFee: '',
-          deadline: '',
-          requirements: '',
-          facilities: '',
-          image: null
         });
       } else {
         throw new Error('Submission failed');
@@ -110,6 +109,65 @@ const SubmitCollege = () => {
       setFormData(prev => ({ ...prev, image: file }));
     }
   };
+
+  const handleBackToForm = () => {
+    setShowPreview(false);
+    setSubmittedCollege(null);
+    // Reset form
+    setFormData({
+      name: '',
+      location: '',
+      type: '',
+      website: '',
+      phone: '',
+      whatsapp: '',
+      email: '',
+      description: '',
+      programs: '',
+      tuitionFee: '',
+      applicationFee: '',
+      deadline: '',
+      requirements: '',
+      facilities: '',
+      image: null
+    });
+  };
+
+  if (showPreview && submittedCollege) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <Navigation />
+        
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">College Submitted Successfully!</h1>
+            <p className="text-lg text-gray-600">
+              Here's how your college will appear once approved:
+            </p>
+          </div>
+
+          <CollegePreview college={submittedCollege} isPreview={true} />
+
+          <div className="text-center mt-8">
+            <Button 
+              onClick={handleBackToForm}
+              variant="outline"
+              className="mr-4"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Submit Another College
+            </Button>
+            <Button 
+              onClick={() => window.location.href = '/colleges'}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Browse All Colleges
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">

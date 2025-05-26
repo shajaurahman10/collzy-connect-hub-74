@@ -1,8 +1,9 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, Settings, LogOut, GraduationCap, Shield } from 'lucide-react';
+import { Menu, X, User, Settings, LogOut, GraduationCap, Shield, LogIn } from 'lucide-react';
+import { authService } from '@/utils/auth';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +16,25 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // This will be managed by auth context later
+  const [isLoggedIn, setIsLoggedIn] = useState(authService.isAuthenticated());
+  const [currentUser, setCurrentUser] = useState(authService.getCurrentUser());
+
+  useEffect(() => {
+    const checkAuth = () => {
+      setIsLoggedIn(authService.isAuthenticated());
+      setCurrentUser(authService.getCurrentUser());
+    };
+    
+    checkAuth();
+    window.addEventListener('storage', checkAuth);
+    return () => window.removeEventListener('storage', checkAuth);
+  }, []);
+
+  const handleLogout = () => {
+    authService.logout();
+    setIsLoggedIn(false);
+    setCurrentUser(null);
+  };
 
   const navItems = [
     { name: 'Home', href: '/', icon: null },

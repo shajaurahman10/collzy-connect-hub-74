@@ -45,8 +45,8 @@ const Hero = () => {
               </div>
               
               <p className="text-xl text-blue-100 mb-8 max-w-2xl animate-fade-in">
-                Discover, explore, and apply to the world's best colleges and universities. 
-                Let us help you find the perfect match for your academic journey.
+                Connect directly with college admissions offices via WhatsApp. 
+                Streamlined applications, instant responses, and personalized guidance for your academic journey.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 mb-12 animate-fade-in">
