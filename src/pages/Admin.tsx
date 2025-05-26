@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Check, X, Eye, Clock, Users, Building2, AlertCircle } from 'lucide-react';
+import { Check, X, Eye, Clock, Users, Building2, AlertCircle, LogIn } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
 
 const Admin = () => {
   const { toast } = useToast();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   // Sample pending submissions
   const [pendingSubmissions, setPendingSubmissions] = useState([
@@ -69,6 +70,15 @@ const Admin = () => {
       status: "approved"
     }
   ]);
+
+  const handleSignIn = () => {
+    // Simple authentication for demo purposes
+    setIsAuthenticated(true);
+    toast({
+      title: "Admin Access Granted",
+      description: "You have been authenticated as an administrator.",
+    });
+  };
 
   const handleApprove = (id: number) => {
     const college = pendingSubmissions.find(c => c.id === id);
@@ -135,15 +145,53 @@ const Admin = () => {
     }
   ];
 
+  // If not authenticated, show sign-in interface
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <Navigation />
+        
+        <div className="max-w-md mx-auto px-4 py-16">
+          <Card className="border-blue-200">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl font-bold text-blue-900">Admin Access</CardTitle>
+              <CardDescription>
+                This area is restricted to authorized administrators only.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button 
+                onClick={handleSignIn}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <LogIn className="h-4 w-4 mr-2" />
+                Sign In as Administrator
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-2">Manage college submissions and platform content</p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="text-gray-600 mt-2">Manage college submissions and platform content</p>
+          </div>
+          <Button 
+            onClick={() => setIsAuthenticated(false)}
+            variant="outline"
+            className="border-blue-300 text-blue-700 hover:bg-blue-50"
+          >
+            Sign Out
+          </Button>
         </div>
 
         {/* Stats Cards */}

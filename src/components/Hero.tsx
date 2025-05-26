@@ -32,6 +32,15 @@ const Hero = () => {
                 College Awaits
               </span>
             </h1>
+
+            {/* Create Profile Button - Placed directly under the main heading */}
+            <div className="mb-6 animate-fade-in">
+              <Button asChild size="lg" className="text-lg px-8 py-4 bg-blue-900 text-white hover:bg-blue-800 border-2 border-white shadow-lg">
+                <Link to="/profile">
+                  Create Profile
+                </Link>
+              </Button>
+            </div>
             
             <p className="text-xl text-blue-100 mb-8 max-w-2xl animate-fade-in">
               Discover, explore, and apply to the world's best colleges and universities. 
@@ -46,8 +55,8 @@ const Hero = () => {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-blue-600">
-                <Link to="/profile">
-                  Create Profile
+                <Link to="/submit-college">
+                  Add Your College
                 </Link>
               </Button>
             </div>
