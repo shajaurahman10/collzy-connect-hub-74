@@ -22,17 +22,17 @@ const Colleges = () => {
   const sampleColleges = [
     {
       id: 1,
-      name: "Harvard University",
-      location: "Cambridge, MA",
+      name: "Yenapoya Institution Of Medical Science",
+      location: "Manglore,Karnataka",
       type: "Private",
       rating: 4.9,
       students: 23000,
-      description: "World-renowned Ivy League institution known for excellence in academics and research.",
-      image: "/placeholder.svg",
-      whatsapp: "+1234567890",
+      description: "UGC ranked Indias one of most trusted medical institution",
+      image: "yenapoya.jpg",
+      whatsapp: "+91 8129913205",
       status: "approved",
-      tuition: "$55,587",
-      founded: 1636
+      tuition: "100000/-",
+      founded: 2001
     },
     {
       id: 2,
