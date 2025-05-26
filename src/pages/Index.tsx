@@ -79,6 +79,13 @@ const Index = () => {
     });
   };
 
+  const handleFavoriteCollege = (collegeId, isFavorited) => {
+    toast({
+      title: isFavorited ? "Added to Favorites" : "Removed from Favorites",
+      description: isFavorited ? "College added to your favorites list" : "College removed from your favorites list",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <Navigation />
@@ -139,6 +146,7 @@ const Index = () => {
                 key={college.id}
                 college={college}
                 onApply={() => handleApplyToCollege(college)}
+                onFavorite={handleFavoriteCollege}
               />
             ))}
           </div>

@@ -18,29 +18,57 @@ interface CollegeCardProps {
     whatsapp: string;
   };
   onApply: () => void;
+  onFavorite?: (collegeId: number, isFavorited: boolean) => void;
 }
 
-const CollegeCard = ({ college, onApply }: CollegeCardProps) => {
-  const [isLiked, setIsLiked] = useState(false);
+const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
+  const [isFavorited, setIsFavorited] = useState(false);
+
+  const handleFavoriteClick = () => {
+    const newFavoriteState = !isFavorited;
+    setIsFavorited(newFavoriteState);
+    
+    // Save to localStorage for persistence
+    const favorites = JSON.parse(localStorage.getItem('favoriteColleges') || '[]');
+    if (newFavoriteState) {
+      if (!favorites.includes(college.id)) {
+        favorites.push(college.id);
+      }
+    } else {
+      const index = favorites.indexOf(college.id);
+      if (index > -1) {
+        favorites.splice(index, 1);
+      }
+    }
+    localStorage.setItem('favoriteColleges', JSON.stringify(favorites));
+    
+    if (onFavorite) {
+      onFavorite(college.id, newFavoriteState);
+    }
+  };
 
   return (
     <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 overflow-hidden bg-white">
+      {/* Like Button - Positioned above the card */}
+      <div className="flex justify-end p-4 pb-0">
+        <button
+          onClick={handleFavoriteClick}
+          className="p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-md"
+        >
+          <Heart 
+            className={`h-5 w-5 transition-colors ${
+              isFavorited ? 'text-red-500 fill-current' : 'text-gray-600'
+            }`} 
+          />
+        </button>
+      </div>
+
       <div className="relative">
         <img 
           src={college.image} 
           alt={college.name}
           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        <button
-          onClick={() => setIsLiked(!isLiked)}
-          className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
-        >
-          <Heart 
-            className={`h-5 w-5 transition-colors ${
-              isLiked ? 'text-red-500 fill-current' : 'text-gray-600'
-            }`} 
-          />
-        </button>
         <div className="absolute top-4 left-4">
           <Badge variant="secondary" className="bg-white/90 backdrop-blur-sm">
             {college.type}

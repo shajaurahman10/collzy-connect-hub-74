@@ -33,9 +33,9 @@ const Hero = () => {
               </span>
             </h1>
 
-            {/* Create Profile Button - Placed directly under the main heading */}
+            {/* Create Profile Button - Enhanced design */}
             <div className="mb-6 animate-fade-in">
-              <Button asChild size="lg" className="text-lg px-8 py-4 bg-blue-900 text-white hover:bg-blue-800 border-2 border-white shadow-lg">
+              <Button asChild size="lg" className="text-lg px-8 py-4 bg-blue-900 text-white hover:bg-blue-800 border-2 border-white shadow-lg font-semibold">
                 <Link to="/profile">
                   Create Profile
                 </Link>
@@ -52,11 +52,6 @@ const Hero = () => {
                 <Link to="/colleges">
                   Explore Colleges
                   <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-blue-600">
-                <Link to="/submit-college">
-                  Add Your College
                 </Link>
               </Button>
             </div>

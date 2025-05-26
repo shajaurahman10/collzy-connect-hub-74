@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,13 +8,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { User, Mail, Phone, MapPin, GraduationCap, Edit, Save, X } from 'lucide-react';
+import { User, Mail, Phone, MapPin, GraduationCap, Edit, Save, X, Heart } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isPublic, setIsPublic] = useState(true);
+  const [favoriteColleges, setFavoriteColleges] = useState([]);
   const { toast } = useToast();
 
   const [profileData, setProfileData] = useState({
@@ -30,8 +31,42 @@ const Profile = () => {
     achievements: ['National Merit Scholar', 'AP Scholar', 'Science Fair Winner'],
   });
 
+  // Sample college data for favorites
+  const sampleColleges = [
+    {
+      id: 1,
+      name: "Harvard University",
+      location: "Cambridge, MA",
+      type: "Private",
+      rating: 4.9,
+      students: 23000
+    },
+    {
+      id: 2,
+      name: "Stanford University", 
+      location: "Stanford, CA",
+      type: "Private",
+      rating: 4.8,
+      students: 17000
+    },
+    {
+      id: 3,
+      name: "MIT",
+      location: "Cambridge, MA",
+      type: "Private", 
+      rating: 4.9,
+      students: 11500
+    }
+  ];
+
+  useEffect(() => {
+    // Load favorite colleges from localStorage
+    const savedFavorites = JSON.parse(localStorage.getItem('favoriteColleges') || '[]');
+    const favoritedColleges = sampleColleges.filter(college => savedFavorites.includes(college.id));
+    setFavoriteColleges(favoritedColleges);
+  }, []);
+
   const handleSave = () => {
-    // Here you would save to Google Sheets
     setIsEditing(false);
     toast({
       title: "Profile Updated",
@@ -41,7 +76,6 @@ const Profile = () => {
 
   const handleCancel = () => {
     setIsEditing(false);
-    // Reset form data if needed
   };
 
   return (
@@ -143,6 +177,34 @@ const Profile = () => {
                     </Badge>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Favorite Colleges */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center">
+                  <Heart className="h-5 w-5 mr-2 text-red-500" />
+                  Favorite Colleges
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {favoriteColleges.length > 0 ? (
+                  <div className="space-y-3">
+                    {favoriteColleges.map((college) => (
+                      <div key={college.id} className="p-3 bg-gray-50 rounded-lg">
+                        <h4 className="font-medium text-gray-900">{college.name}</h4>
+                        <p className="text-sm text-gray-600">{college.location}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <Badge variant="outline">{college.type}</Badge>
+                          <span className="text-sm text-gray-500">★ {college.rating}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-sm">No favorite colleges yet. Start exploring to add some!</p>
+                )}
               </CardContent>
             </Card>
           </div>
