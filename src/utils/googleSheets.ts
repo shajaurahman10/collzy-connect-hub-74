@@ -66,21 +66,55 @@ class GoogleSheetsService {
         status: 'pending'
       };
 
-      // In production, this would make an actual API call to Google Sheets
       console.log('Submitting college to Google Sheets:', college);
+
+      // Make actual API call to Google Sheets
+      const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.collegesSheetId}/values/Sheet1:append?valueInputOption=RAW`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.accessToken}`
+        },
+        body: JSON.stringify({
+          values: [[
+            college.id,
+            college.name,
+            college.location,
+            college.type,
+            college.description,
+            college.website,
+            college.whatsapp,
+            college.email,
+            college.submittedBy,
+            college.submittedDate,
+            college.status
+          ]]
+        })
+      });
+
+      if (response.ok) {
+        // Also store locally as backup
+        const existingColleges = this.getStoredColleges();
+        existingColleges.push(college);
+        localStorage.setItem('collzy_colleges', JSON.stringify(existingColleges));
+        return true;
+      } else {
+        throw new Error('Failed to submit to Google Sheets');
+      }
       
-      // Simulate API call
-      await this.delay(1000);
-      
-      // Store in localStorage as fallback (for demo purposes)
-      const existingColleges = this.getStoredColleges();
-      existingColleges.push(college);
-      localStorage.setItem('collzy_colleges', JSON.stringify(existingColleges));
-      
-      return true;
     } catch (error) {
       console.error('Error submitting college:', error);
-      return false;
+      // Fallback to localStorage if Google Sheets fails
+      const existingColleges = this.getStoredColleges();
+      const college: College = {
+        ...collegeData,
+        id: this.generateId(),
+        submittedDate: new Date().toISOString(),
+        status: 'pending'
+      };
+      existingColleges.push(college);
+      localStorage.setItem('collzy_colleges', JSON.stringify(existingColleges));
+      return true;
     }
   }
 

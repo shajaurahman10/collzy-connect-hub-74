@@ -10,6 +10,7 @@ import Navigation from '@/components/Navigation';
 import Hero from '@/components/Hero';
 import CollegeCard from '@/components/CollegeCard';
 import { useToast } from '@/hooks/use-toast';
+import { googleSheetsService } from '@/utils/googleSheets';
 
 const Index = () => {
   const [colleges, setColleges] = useState([]);
@@ -58,8 +59,24 @@ const Index = () => {
   ];
 
   useEffect(() => {
-    setColleges(sampleColleges);
+    loadColleges();
   }, []);
+
+  const loadColleges = async () => {
+    try {
+      const approvedColleges = await googleSheetsService.getColleges('approved');
+      if (approvedColleges.length > 0) {
+        setColleges(approvedColleges);
+      } else {
+        // Fallback to sample data if no colleges are found
+        setColleges(sampleColleges);
+      }
+    } catch (error) {
+      console.error('Error loading colleges:', error);
+      // Fallback to sample data
+      setColleges(sampleColleges);
+    }
+  };
 
   const filteredColleges = colleges.filter(college => {
     const matchesSearch = college.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

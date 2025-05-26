@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,33 +27,7 @@ const Admin = () => {
     whatsapp: ''
   });
   
-  // Sample pending submissions
-  const [pendingSubmissions, setPendingSubmissions] = useState([
-    {
-      id: 1,
-      name: "University of California, Berkeley",
-      location: "Berkeley, CA",
-      type: "Public",
-      submittedBy: "admin@berkeley.edu",
-      submittedDate: "2024-01-15",
-      status: "pending",
-      description: "Public research university known for academic excellence and research innovation.",
-      whatsapp: "+15551234567",
-      website: "https://berkeley.edu"
-    },
-    {
-      id: 2,
-      name: "New York Institute of Technology",
-      location: "New York, NY",
-      type: "Private",
-      submittedBy: "admissions@nyit.edu",
-      submittedDate: "2024-01-14",
-      status: "pending",
-      description: "Private technological university focusing on applied learning and research.",
-      whatsapp: "+15551234568",
-      website: "https://nyit.edu"
-    }
-  ]);
+  const [pendingSubmissions, setPendingSubmissions] = useState([]);
 
   const [approvedColleges, setApprovedColleges] = useState([
     {
@@ -84,6 +58,39 @@ const Admin = () => {
       featured: true
     }
   ]);
+
+  // Load data from Google Sheets when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadPendingSubmissions();
+      loadApprovedColleges();
+    }
+  }, [isAuthenticated]);
+
+  const loadPendingSubmissions = async () => {
+    try {
+      const colleges = await googleSheetsService.getColleges('pending');
+      setPendingSubmissions(colleges);
+    } catch (error) {
+      console.error('Error loading pending submissions:', error);
+    }
+  };
+
+  const loadApprovedColleges = async () => {
+    try {
+      const colleges = await googleSheetsService.getColleges('approved');
+      setApprovedColleges(colleges.map(college => ({
+        id: college.id,
+        name: college.name,
+        location: college.location,
+        type: college.type,
+        approvedDate: college.submittedDate.split('T')[0],
+        status: 'approved'
+      })));
+    } catch (error) {
+      console.error('Error loading approved colleges:', error);
+    }
+  };
 
   const handleLogin = () => {
     if (loginForm.username === 'collzy776' && loginForm.password === 'collzyceo776') {

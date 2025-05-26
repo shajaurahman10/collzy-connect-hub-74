@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Upload, Building2, MapPin, Phone, Globe, Send } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
+import { googleSheetsService } from '@/utils/googleSheets';
 
 const SubmitCollege = () => {
   const { toast } = useToast();
@@ -36,33 +37,67 @@ const SubmitCollege = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      // Validate required fields
+      if (!formData.name || !formData.location || !formData.type || !formData.description || !formData.whatsapp) {
+        toast({
+          title: "Missing Required Fields",
+          description: "Please fill in all required fields marked with *",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Submit to Google Sheets
+      const success = await googleSheetsService.submitCollege({
+        name: formData.name,
+        location: formData.location,
+        type: formData.type,
+        description: formData.description,
+        website: formData.website || '',
+        whatsapp: formData.whatsapp,
+        email: formData.email || '',
+        submittedBy: formData.email || 'anonymous@collzy.com'
+      });
+
+      if (success) {
+        toast({
+          title: "College Submitted Successfully!",
+          description: "Your college submission has been sent for admin review. You'll be notified once it's approved.",
+        });
+        
+        // Reset form
+        setFormData({
+          name: '',
+          location: '',
+          type: '',
+          website: '',
+          phone: '',
+          whatsapp: '',
+          email: '',
+          description: '',
+          programs: '',
+          tuitionFee: '',
+          applicationFee: '',
+          deadline: '',
+          requirements: '',
+          facilities: '',
+          image: null
+        });
+      } else {
+        throw new Error('Submission failed');
+      }
+    } catch (error) {
+      console.error('Error submitting college:', error);
       toast({
-        title: "College Submitted Successfully!",
-        description: "Your college submission has been sent for admin review. You'll be notified once it's approved.",
+        title: "Submission Failed",
+        description: "There was an error submitting your college. Please try again.",
+        variant: "destructive",
       });
-      
-      // Reset form
-      setFormData({
-        name: '',
-        location: '',
-        type: '',
-        website: '',
-        phone: '',
-        whatsapp: '',
-        email: '',
-        description: '',
-        programs: '',
-        tuitionFee: '',
-        applicationFee: '',
-        deadline: '',
-        requirements: '',
-        facilities: '',
-        image: null
-      });
-    }, 2000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
