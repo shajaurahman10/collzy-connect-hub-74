@@ -256,3 +256,16 @@ export type { College, UserProfile };
 
 // Initialize service
 googleSheetsService.initialize();
+
+/**
+ * Fetches a list of approved colleges from Google Sheets.
+ * @returns A promise that resolves to an array of approved College objects.
+ */
+export const fetchColleges = async (): Promise<College[]> => {
+  try {
+    return await googleSheetsService.getColleges('approved');
+  } catch (error) {
+    console.error('Error fetching approved colleges:', error);
+    return [];
+  }
+};
