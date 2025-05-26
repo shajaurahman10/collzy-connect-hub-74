@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, Settings, LogOut, GraduationCap } from 'lucide-react';
+import { Menu, X, User, Settings, LogOut, GraduationCap, Shield } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +22,7 @@ const Navigation = () => {
     { name: 'Colleges', href: '/colleges', icon: null },
     { name: 'Add Your College', href: '/submit-college', icon: null },
     { name: 'Profile', href: '/profile', icon: null },
+    { name: 'Admin Panel', href: '/admin', icon: Shield },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -48,12 +49,13 @@ const Navigation = () => {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
                   isActive(item.href)
                     ? 'bg-blue-100 text-blue-700'
                     : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                 }`}
               >
+                {item.icon && <item.icon className="h-4 w-4" />}
                 {item.name}
               </Link>
             ))}
@@ -111,13 +113,14 @@ const Navigation = () => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors flex items-center gap-2 ${
                     isActive(item.href)
                       ? 'bg-blue-100 text-blue-700'
                       : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                   }`}
                   onClick={() => setIsOpen(false)}
                 >
+                  {item.icon && <item.icon className="h-5 w-5" />}
                   {item.name}
                 </Link>
               ))}
