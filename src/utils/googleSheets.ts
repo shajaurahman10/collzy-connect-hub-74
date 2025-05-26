@@ -1,4 +1,3 @@
-
 // Google Sheets Integration for Collzy
 // This file handles communication with Google Sheets API for storing user profiles and college data
 
@@ -8,8 +7,8 @@ const GOOGLE_SHEETS_CONFIG = {
   projectId: 'collzy-connect',
   serviceAccountEmail: 'collzysheetin@collzy-connect.iam.gserviceaccount.com',
   serviceAccountId: '116508275097633380604',
-  // Note: In production, the private key should be stored securely
-  // privateKey: '-----BEGIN PRIVATE KEY-----...-----END PRIVATE KEY-----'
+  // PASTE YOUR PRIVATE KEY HERE (replace the entire line below):
+  privateKey: '-----BEGIN PRIVATE KEY-----\nPASTE_YOUR_ACTUAL_PRIVATE_KEY_HERE\n-----END PRIVATE KEY-----'
 };
 
 interface College {

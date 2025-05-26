@@ -36,7 +36,7 @@ const Navigation = () => {
             <img 
               src="/lovable-uploads/ba2b27af-670e-433d-a061-f5e9501ac624.png" 
               alt="Collzy" 
-              className="h-10 w-10"
+              className="h-10 w-10 rounded-full object-cover border-2 border-blue-200"
             />
             <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Collzy
