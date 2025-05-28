@@ -2,7 +2,7 @@
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Star, MapPin, Users, MessageCircle, Heart, ExternalLink, Phone, Mail, Globe } from 'lucide-react';
+import { Star, MapPin, Users, MessageCircle, Heart, ExternalLink, Globe } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 interface CollegeCardProps {
@@ -61,21 +61,10 @@ const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
     }
   };
 
-  const handleEmailClick = () => {
-    if (college.email) {
-      window.open(`mailto:${college.email}`, '_blank');
-    }
-  };
-
   return (
     <Card className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden bg-white h-full flex flex-col border-0 shadow-lg">
-      {/* Header with favorite button */}
-      <div className="relative">
-        <img 
-          src={college.image} 
-          alt={college.name}
-          className="w-full h-44 sm:h-52 object-cover group-hover:scale-105 transition-transform duration-500"
-        />
+      {/* Header with favorite button - no image */}
+      <CardHeader className="pb-3 px-4 sm:px-6 pt-4 sm:pt-6 relative">
         <div className="absolute top-3 right-3">
           <button
             onClick={handleFavoriteClick}
@@ -90,22 +79,22 @@ const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
             />
           </button>
         </div>
+        
         <div className="absolute top-3 left-3">
-          <Badge variant="secondary" className="bg-white/95 backdrop-blur-sm text-blue-700 border-0 shadow-sm">
+          <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-0 shadow-sm">
             {college.type}
           </Badge>
         </div>
+        
         {college.founded && (
-          <div className="absolute bottom-3 left-3">
+          <div className="absolute top-3 left-20">
             <Badge variant="outline" className="bg-blue-600 text-white border-0 text-xs">
               Est. {college.founded}
             </Badge>
           </div>
         )}
-      </div>
 
-      <CardHeader className="pb-3 px-4 sm:px-6 pt-4 sm:pt-6">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start justify-between gap-3 mt-12">
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-lg sm:text-xl text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight mb-2">
               {college.name}
@@ -132,40 +121,27 @@ const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
           <span>{college.students.toLocaleString()} students</span>
         </div>
 
-        {/* Quick Contact Icons */}
-        <div className="flex gap-2 mb-4">
-          {college.website && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleWebsiteClick}
-              className="flex-1 h-8 border-gray-200 hover:border-blue-300 hover:bg-blue-50"
-            >
-              <Globe className="h-3 w-3 mr-1" />
-              <span className="text-xs">Website</span>
-            </Button>
-          )}
-          {college.email && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleEmailClick}
-              className="flex-1 h-8 border-gray-200 hover:border-green-300 hover:bg-green-50"
-            >
-              <Mail className="h-3 w-3 mr-1" />
-              <span className="text-xs">Email</span>
-            </Button>
-          )}
-        </div>
+        {/* Website Button */}
+        {college.website && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleWebsiteClick}
+            className="w-full mb-4 h-9 border-gray-200 hover:border-blue-300 hover:bg-blue-50"
+          >
+            <Globe className="h-4 w-4 mr-2" />
+            Visit Official Website
+          </Button>
+        )}
       </CardContent>
 
       <CardFooter className="pt-0 px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 mt-auto">
         <Button 
           onClick={onApply}
-          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg"
+          className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-md hover:shadow-lg"
         >
           <MessageCircle className="h-4 w-4 mr-2" />
-          Contact via WhatsApp
+          Apply via WhatsApp
         </Button>
         
         <div className="flex gap-2 w-full">

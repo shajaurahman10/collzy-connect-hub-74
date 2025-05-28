@@ -72,7 +72,23 @@ const Colleges = () => {
     });
 
   const handleApplyToCollege = (college) => {
-    const message = `Hi! I'm interested in applying to ${college.name}. Could you please provide me with more information about the admission process and requirements? Thank you!`;
+    const message = `🎓 Hello! I found your college through Collzy platform and I'm very interested in applying to ${college.name}.
+
+Could you please provide me with detailed information about:
+
+📚 Course details and eligibility criteria
+💰 Fee structure (tuition + other charges)
+🏠 Hostel facilities and accommodation fees
+📅 Admission process and important dates
+📋 Required documents for application
+🎯 Placement opportunities and statistics
+🏛️ Campus facilities and infrastructure
+
+I'm excited to learn more about your institution. Thank you for your time!
+
+Best regards,
+A prospective student from Collzy 🌟`;
+
     const whatsappUrl = `https://wa.me/${college.whatsapp}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
     

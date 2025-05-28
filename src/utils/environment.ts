@@ -2,7 +2,7 @@
 // Environment configuration helper
 export const config = {
   googleSheets: {
-    spreadsheetId: import.meta.env.VITE_GOOGLE_SPREADSHEET_ID,
+    spreadsheetId: '1c4Ka1Q7ctWUIXtLoPxeqQR70UuSziiMwDmiM2ZuIquA',
     apiKey: import.meta.env.VITE_GOOGLE_API_KEY,
   },
   app: {
