@@ -1,17 +1,15 @@
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, MapPin, Users, Star, Building2, SlidersHorizontal } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import CollegeCard from '@/components/CollegeCard';
+import SearchFilters from '@/components/SearchFilters';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { indianColleges, getAllStates } from '@/data/indianColleges';
-import { googleSheetsService } from '@/utils/googleSheets';
+import { googleSheetsIntegration } from '@/utils/googleSheetsIntegration';
 
 const Colleges = () => {
   const [colleges, setColleges] = useState([]);
@@ -20,6 +18,7 @@ const Colleges = () => {
   const [selectedState, setSelectedState] = useState('all');
   const [sortBy, setSortBy] = useState('name');
   const [showFilters, setShowFilters] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -28,21 +27,31 @@ const Colleges = () => {
 
   const loadColleges = async () => {
     try {
-      const approvedColleges = await googleSheetsService.getColleges('approved');
-      // Combine Indian colleges with any other approved colleges
-      const allColleges = [...indianColleges, ...approvedColleges];
+      setLoading(true);
+      // Try to get colleges from Google Sheets first
+      const sheetsColleges = await googleSheetsIntegration.getColleges();
+      // Combine with Indian colleges data
+      const allColleges = [...indianColleges, ...sheetsColleges];
       setColleges(allColleges);
     } catch (error) {
       console.error('Error loading colleges:', error);
-      // Fallback to Indian colleges
+      // Fallback to Indian colleges only
       setColleges(indianColleges);
+      toast({
+        title: "Loading Notice",
+        description: "Using local college data. Connect Google Sheets for live updates.",
+        variant: "default"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   const filteredAndSortedColleges = colleges
     .filter(college => {
       const matchesSearch = college.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           college.location.toLowerCase().includes(searchTerm.toLowerCase());
+                           college.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           college.state.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesFilter = filterType === 'all' || college.type.toLowerCase() === filterType;
       const matchesState = selectedState === 'all' || college.state === selectedState;
       return matchesSearch && matchesFilter && matchesState && college.status === 'approved';
@@ -56,7 +65,7 @@ const Colleges = () => {
         case 'students':
           return b.students - a.students;
         case 'founded':
-          return b.founded - a.founded;
+          return (b.founded || 0) - (a.founded || 0);
         default:
           return 0;
       }
@@ -80,137 +89,87 @@ const Colleges = () => {
     });
   };
 
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setFilterType('all');
+    setSelectedState('all');
+    setSortBy('name');
+  };
+
   const states = getAllStates();
+
+  if (loading) {
+    return (
+      <>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+          <Navigation />
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-blue-600 font-medium">Loading colleges...</p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-blue-100 via-blue-50 to-indigo-100">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <Navigation />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="text-center mb-8 lg:mb-12">
-            <h1 className="text-3xl sm:text-4xl font-bold text-blue-900 mb-4">Browse Colleges</h1>
-            <p className="text-lg sm:text-xl text-blue-700 max-w-3xl mx-auto px-4">
-              Discover the perfect college for your academic journey. Explore thousands of institutions across India 
-              and find your ideal match.
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+              Discover Your Perfect College
+            </h1>
+            <p className="text-lg sm:text-xl text-blue-700 max-w-3xl mx-auto px-4 leading-relaxed">
+              Explore thousands of institutions across India. Find your ideal academic match with our comprehensive search and filtering system.
             </p>
           </div>
 
           {/* Search and Filters */}
-          <Card className="mb-6 lg:mb-8 border-blue-200 bg-white/80 backdrop-blur-sm">
-            <CardContent className="p-4 sm:p-6">
-              <div className="space-y-4">
-                {/* Main Search */}
-                <div className="flex flex-col lg:flex-row gap-4">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500 h-5 w-5" />
-                    <Input
-                      placeholder="Search colleges, universities, or locations..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 h-10 sm:h-12 text-base sm:text-lg border-blue-300 focus:border-blue-500"
-                    />
-                  </div>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="h-10 sm:h-12 px-4 sm:px-6 border-blue-300 text-blue-700 hover:bg-blue-50"
-                  >
-                    <SlidersHorizontal className="h-4 sm:h-5 w-4 sm:w-5 mr-2" />
-                    <span className="hidden sm:inline">Filters</span>
-                    <span className="sm:hidden">Filter</span>
-                  </Button>
-                </div>
-
-                {/* Extended Filters */}
-                {showFilters && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-blue-200">
-                    <div>
-                      <label className="text-sm font-medium text-blue-800 mb-2 block">State</label>
-                      <Select value={selectedState} onValueChange={setSelectedState}>
-                        <SelectTrigger className="border-blue-300">
-                          <SelectValue placeholder="All States" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All States</SelectItem>
-                          {states.map(state => (
-                            <SelectItem key={state} value={state}>{state}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-medium text-blue-800 mb-2 block">Institution Type</label>
-                      <Select value={filterType} onValueChange={setFilterType}>
-                        <SelectTrigger className="border-blue-300">
-                          <SelectValue placeholder="All Types" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Types</SelectItem>
-                          <SelectItem value="private">Private</SelectItem>
-                          <SelectItem value="public">Public</SelectItem>
-                          <SelectItem value="community">Community</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-medium text-blue-800 mb-2 block">Sort By</label>
-                      <Select value={sortBy} onValueChange={setSortBy}>
-                        <SelectTrigger className="border-blue-300">
-                          <SelectValue placeholder="Sort by" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="name">Name (A-Z)</SelectItem>
-                          <SelectItem value="rating">Highest Rated</SelectItem>
-                          <SelectItem value="students">Most Students</SelectItem>
-                          <SelectItem value="founded">Newest First</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex items-end">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => {
-                          setSearchTerm('');
-                          setFilterType('all');
-                          setSelectedState('all');
-                          setSortBy('name');
-                        }}
-                        className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
-                      >
-                        Clear Filters
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <SearchFilters
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            filterType={filterType}
+            onFilterTypeChange={setFilterType}
+            selectedState={selectedState}
+            onStateChange={setSelectedState}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            states={states}
+            showFilters={showFilters}
+            onToggleFilters={() => setShowFilters(!showFilters)}
+            onClearFilters={handleClearFilters}
+            colleges={colleges}
+          />
 
           {/* Results Summary */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-            <p className="text-blue-700 text-sm sm:text-base">
-              Showing <span className="font-semibold">{filteredAndSortedColleges.length}</span> colleges
-              {searchTerm && (
-                <span> for "<span className="font-semibold">{searchTerm}</span>"</span>
+            <div>
+              <p className="text-blue-700 text-base sm:text-lg font-medium">
+                Found <span className="font-bold text-blue-800">{filteredAndSortedColleges.length}</span> colleges
+                {searchTerm && (
+                  <span> matching "<span className="font-semibold text-blue-900">{searchTerm}</span>"</span>
+                )}
+              </p>
+              {selectedState !== 'all' && (
+                <p className="text-sm text-blue-600 mt-1">in {selectedState}</p>
               )}
-            </p>
-            
-            <div className="flex flex-wrap gap-2">
-              <Badge variant={filterType === 'all' ? 'default' : 'outline'} className="bg-blue-600 text-xs sm:text-sm">
-                All ({colleges.filter(c => c.status === 'approved').length})
-              </Badge>
-              <Badge variant={filterType === 'private' ? 'default' : 'outline'} className="bg-blue-600 text-xs sm:text-sm">
-                Private ({colleges.filter(c => c.type.toLowerCase() === 'private' && c.status === 'approved').length})
-              </Badge>
-              <Badge variant={filterType === 'public' ? 'default' : 'outline'} className="bg-blue-600 text-xs sm:text-sm">
-                Public ({colleges.filter(c => c.type.toLowerCase() === 'public' && c.status === 'approved').length})
-              </Badge>
             </div>
+            
+            {(searchTerm || filterType !== 'all' || selectedState !== 'all') && (
+              <Button 
+                variant="outline" 
+                onClick={handleClearFilters}
+                className="border-blue-200 text-blue-600 hover:bg-blue-50"
+              >
+                Clear All Filters
+              </Button>
+            )}
           </div>
 
           {/* Colleges Grid */}
@@ -226,35 +185,21 @@ const Colleges = () => {
               ))}
             </div>
           ) : (
-            <Card className="text-center py-12 sm:py-16 border-blue-200 bg-white/80">
+            <Card className="text-center py-16 sm:py-20 border-blue-200 bg-white/80 backdrop-blur-sm">
               <CardContent>
-                <Building2 className="h-12 sm:h-16 w-12 sm:w-16 text-blue-300 mx-auto mb-4" />
-                <h3 className="text-lg sm:text-xl font-semibold text-blue-700 mb-2">No colleges found</h3>
-                <p className="text-blue-600 mb-6 px-4">
-                  Try adjusting your search terms or filters to find more results.
+                <Building2 className="h-16 sm:h-20 w-16 sm:w-20 text-blue-300 mx-auto mb-6" />
+                <h3 className="text-xl sm:text-2xl font-semibold text-blue-700 mb-3">No colleges found</h3>
+                <p className="text-blue-600 mb-8 px-4 max-w-md mx-auto">
+                  We couldn't find any colleges matching your criteria. Try adjusting your search terms or filters.
                 </p>
                 <Button 
-                  onClick={() => {
-                    setSearchTerm('');
-                    setFilterType('all');
-                    setSelectedState('all');
-                    setSortBy('name');
-                  }}
+                  onClick={handleClearFilters}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
                   Clear All Filters
                 </Button>
               </CardContent>
             </Card>
-          )}
-
-          {/* Load More */}
-          {filteredAndSortedColleges.length > 0 && (
-            <div className="text-center mt-8 lg:mt-12">
-              <Button variant="outline" size="lg" className="border-blue-300 text-blue-700 hover:bg-blue-50">
-                Load More Colleges
-              </Button>
-            </div>
           )}
         </div>
       </div>
