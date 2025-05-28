@@ -2,9 +2,13 @@
 // This utility handles WhatsApp messaging for college applications
 
 interface ApplicationMessage {
+  collegeName: string;
   studentName: string;
   studentEmail: string;
-  collegeName: string;
+  studentPhone?: string;
+  studentEducation?: string;
+  studentMarks?: string;
+  studentAchievements?: string;
   message?: string;
 }
 
@@ -16,11 +20,12 @@ class WhatsAppService {
 Hi! I'm interested in applying to ${data.collegeName}.
 
 My Details:
-- Name: ${data.studentName}
-- Email: ${data.studentEmail}
+${data.studentPhone ? `- Phone: ${data.studentPhone}` : ''}
+${data.studentEducation ? `- Education: ${data.studentEducation}` : ''}
+${data.studentMarks ? `- Marks/Percentage: ${data.studentMarks}` : ''}
+${data.studentAchievements ? `- Achievements: ${data.studentAchievements}` : ''}
 
 Could you please provide me with more information about:
-- Admission requirements
 - Application deadlines
 - Tuition fees and scholarships
 - Campus facilities and programs
@@ -71,6 +76,10 @@ ${data.studentName}
     const applicationData: ApplicationMessage = {
       studentName: studentInfo?.studentName || 'Prospective Student',
       studentEmail: studentInfo?.studentEmail || 'Not provided',
+      studentPhone: studentInfo?.studentPhone,
+      studentEducation: studentInfo?.studentEducation,
+      studentMarks: studentInfo?.studentMarks,
+      studentAchievements: studentInfo?.studentAchievements,
       collegeName,
       message: studentInfo?.message
     };
@@ -255,7 +264,7 @@ Thank you!
 }
 
 // Export singleton instance
-export const whatsappService = new WhatsAppService();
+export const whatsAppService = new WhatsAppService();
 
 // Export types
 export type { ApplicationMessage };

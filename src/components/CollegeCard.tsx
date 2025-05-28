@@ -55,12 +55,18 @@ const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
     }
   };
 
-  const handleWebsiteClick = () => {
     if (college.website) {
       window.open(college.website.startsWith('http') ? college.website : `https://${college.website}`, '_blank');
     }
   };
 
+  const { profile } = useProfile();
+
+  const handleApply = () => {
+    onApply(college, profile);
+  };
+
+  return (
   return (
     <Card className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden bg-white h-full flex flex-col border-0 shadow-lg">
       {/* Header with favorite button - no image */}
@@ -133,13 +139,13 @@ const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
             Visit Official Website
           </Button>
         )}
-      </CardContent>
 
       <CardFooter className="pt-0 px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 mt-auto">
         <Button 
-          onClick={onApply}
+          onClick={handleApply}
           className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-md hover:shadow-lg"
         >
+          <MessageCircle className="h-4 w-4 mr-2" />
           <MessageCircle className="h-4 w-4 mr-2" />
           Apply via WhatsApp
         </Button>

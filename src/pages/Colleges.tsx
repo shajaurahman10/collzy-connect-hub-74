@@ -16,12 +16,13 @@ const Colleges = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [selectedState, setSelectedState] = useState('all');
-  const [sortBy, setSortBy] = useState('name');
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { profile } = useProfile();
 
   useEffect(() => {
+    loadColleges();
     loadColleges();
   }, []);
 
@@ -68,13 +69,22 @@ const Colleges = () => {
           return (b.founded || 0) - (a.founded || 0);
         default:
           return 0;
-      }
     });
 
   const handleApplyToCollege = (college) => {
+    // Create a personalized message with profile data
     const message = `🎓 Hello! I found your college through Collzy platform and I'm very interested in applying to ${college.name}.
 
+My Details:
+👤 Name: ${profile.name || 'Not provided'}
+📧 Email: ${profile.email || 'Not provided'}
+📱 Phone: ${profile.phone || 'Not provided'}
+🎓 Education: ${profile.education || 'Not provided'}
+📊 Marks/Percentage: ${profile.marks || 'Not provided'}
+${profile.achievements ? `🏆 Achievements: ${profile.achievements}` : ''}
+
 Could you please provide me with detailed information about:
+
 
 📚 Course details and eligibility criteria
 💰 Fee structure (tuition + other charges)
@@ -83,17 +93,17 @@ Could you please provide me with detailed information about:
 📋 Required documents for application
 🎯 Placement opportunities and statistics
 🏛️ Campus facilities and infrastructure
-
 I'm excited to learn more about your institution. Thank you for your time!
 
 Best regards,
-A prospective student from Collzy 🌟`;
+${profile.name || 'A prospective student from Collzy'} 🌟`;
 
     const whatsappUrl = `https://wa.me/${college.whatsapp}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
-    
+
     toast({
       title: "Application Initiated",
+      description: `Opening WhatsApp to contact ${college.name}`,
       description: `Opening WhatsApp to contact ${college.name}`,
     });
   };
