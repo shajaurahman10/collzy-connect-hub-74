@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,54 +8,17 @@ import { Input } from '@/components/ui/input';
 import Navigation from '@/components/Navigation';
 import Hero from '@/components/Hero';
 import CollegeCard from '@/components/CollegeCard';
+import StarNominationForm from '@/components/StarNominationForm';
 import { useToast } from '@/hooks/use-toast';
 import { googleSheetsService } from '@/utils/googleSheets';
+import { indianColleges, getAllStates } from '@/data/indianColleges';
 
 const Index = () => {
   const [colleges, setColleges] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [selectedState, setSelectedState] = useState('all');
   const { toast } = useToast();
-
-  // Sample colleges data (will be replaced with Google Sheets integration)
-  const sampleColleges = [
-    {
-      id: 1,
-      name: "Harvard University",
-      location: "Cambridge, MA",
-      type: "Private",
-      rating: 4.9,
-      students: 23000,
-      description: "World-renowned Ivy League institution known for excellence in academics and research.",
-      image: "/placeholder.svg",
-      whatsapp: "+1234567890",
-      status: "approved"
-    },
-    {
-      id: 2,
-      name: "Stanford University",
-      location: "Stanford, CA",
-      type: "Private",
-      rating: 4.8,
-      students: 17000,
-      description: "Leading university in technology and innovation, located in Silicon Valley.",
-      image: "/placeholder.svg",
-      whatsapp: "+1234567891",
-      status: "approved"
-    },
-    {
-      id: 3,
-      name: "MIT",
-      location: "Cambridge, MA",
-      type: "Private",
-      rating: 4.9,
-      students: 11500,
-      description: "Premier institution for science, technology, engineering, and mathematics.",
-      image: "/placeholder.svg",
-      whatsapp: "+1234567892",
-      status: "approved"
-    }
-  ];
 
   useEffect(() => {
     loadColleges();
@@ -65,16 +27,13 @@ const Index = () => {
   const loadColleges = async () => {
     try {
       const approvedColleges = await googleSheetsService.getColleges('approved');
-      if (approvedColleges.length > 0) {
-        setColleges(approvedColleges);
-      } else {
-        // Fallback to sample data if no colleges are found
-        setColleges(sampleColleges);
-      }
+      // Combine Indian colleges with any other approved colleges
+      const allColleges = [...indianColleges, ...approvedColleges];
+      setColleges(allColleges);
     } catch (error) {
       console.error('Error loading colleges:', error);
-      // Fallback to sample data
-      setColleges(sampleColleges);
+      // Fallback to Indian colleges
+      setColleges(indianColleges);
     }
   };
 
@@ -82,7 +41,8 @@ const Index = () => {
     const matchesSearch = college.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          college.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterType === 'all' || college.type.toLowerCase() === filterType;
-    return matchesSearch && matchesFilter && college.status === 'approved';
+    const matchesState = selectedState === 'all' || college.state === selectedState;
+    return matchesSearch && matchesFilter && matchesState && college.status === 'approved';
   });
 
   const handleApplyToCollege = (college) => {
@@ -103,24 +63,43 @@ const Index = () => {
     });
   };
 
+  const states = getAllStates();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <Navigation />
       
       <Hero />
 
+      {/* Starred Colleges Section */}
+      <section className="py-16 px-4 bg-gradient-to-r from-yellow-50 to-orange-50">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Star Colleges</h2>
+          <p className="text-lg text-gray-600 mb-8">Featured institutions that stand out for excellence</p>
+          
+          <div className="bg-white rounded-2xl shadow-lg p-12 border-2 border-dashed border-yellow-300">
+            <Star className="h-16 w-16 text-yellow-500 mx-auto mb-6" />
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">No Star Colleges Yet</h3>
+            <p className="text-gray-600 mb-6">
+              Help us feature outstanding colleges by nominating your institution for star status.
+            </p>
+            <StarNominationForm />
+          </div>
+        </div>
+      </section>
+
       {/* Search and Filter Section */}
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Discover Your Perfect College</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Discover Indian Colleges</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Explore thousands of colleges and universities worldwide. Find the perfect match for your academic journey.
+              Explore top colleges and universities across India. Find the perfect match for your academic journey.
             </p>
           </div>
 
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-            <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex flex-col lg:flex-row gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <Input
@@ -130,7 +109,19 @@ const Index = () => {
                   className="pl-10 h-12 text-lg"
                 />
               </div>
-              <div className="flex gap-2">
+              
+              <div className="flex flex-wrap gap-2">
+                <select
+                  value={selectedState}
+                  onChange={(e) => setSelectedState(e.target.value)}
+                  className="h-12 px-4 border border-gray-300 rounded-md bg-white"
+                >
+                  <option value="all">All States</option>
+                  {states.map(state => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                </select>
+                
                 <Button
                   variant={filterType === 'all' ? 'default' : 'outline'}
                   onClick={() => setFilterType('all')}
@@ -158,7 +149,7 @@ const Index = () => {
 
           {/* Colleges Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredColleges.map((college) => (
+            {filteredColleges.slice(0, 50).map((college) => (
               <CollegeCard
                 key={college.id}
                 college={college}
@@ -173,6 +164,15 @@ const Index = () => {
               <Building2 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-600 mb-2">No colleges found</h3>
               <p className="text-gray-500">Try adjusting your search terms or filters</p>
+            </div>
+          )}
+
+          {filteredColleges.length > 50 && (
+            <div className="text-center mt-8">
+              <p className="text-gray-600 mb-4">Showing first 50 results. Use filters to narrow your search.</p>
+              <Button asChild variant="outline">
+                <Link to="/colleges">View All Colleges</Link>
+              </Button>
             </div>
           )}
         </div>
@@ -226,7 +226,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section - Removed "Add Your College" button */}
       <section className="py-16 bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800">
         <div className="max-w-4xl mx-auto text-center px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
@@ -243,8 +243,8 @@ const Index = () => {
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="text-lg px-8 py-3 bg-transparent border-white text-white hover:bg-white hover:text-blue-600">
-              <Link to="/submit-college">
-                Add Your College
+              <Link to="/colleges">
+                Explore Colleges
               </Link>
             </Button>
           </div>
@@ -269,7 +269,6 @@ const Index = () => {
               <ul className="space-y-2 text-gray-400">
                 <li><Link to="/colleges" className="hover:text-white transition-colors">Browse Colleges</Link></li>
                 <li><Link to="/profile" className="hover:text-white transition-colors">Create Profile</Link></li>
-                <li><Link to="/submit-college" className="hover:text-white transition-colors">Add Your College</Link></li>
               </ul>
             </div>
             <div>

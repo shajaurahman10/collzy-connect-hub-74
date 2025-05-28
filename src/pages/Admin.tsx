@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,10 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Check, X, Eye, Clock, Users, Building2, AlertCircle, LogIn, Star, Trash2, Plus } from 'lucide-react';
+import { Check, X, Eye, Clock, Users, Building2, AlertCircle, LogIn, Star, Trash2, Plus, Bell } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
 import { googleSheetsService } from '@/utils/googleSheets';
+import { notificationService, StarCollegeNomination } from '@/utils/notifications';
 
 const Admin = () => {
   const { toast } = useToast();
@@ -28,6 +28,7 @@ const Admin = () => {
   });
   
   const [pendingSubmissions, setPendingSubmissions] = useState([]);
+  const [starNominations, setStarNominations] = useState<StarCollegeNomination[]>([]);
 
   const [approvedColleges, setApprovedColleges] = useState([
     {
@@ -59,11 +60,12 @@ const Admin = () => {
     }
   ]);
 
-  // Load data from Google Sheets when authenticated
+  // Load data when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       loadPendingSubmissions();
       loadApprovedColleges();
+      loadStarNominations();
     }
   }, [isAuthenticated]);
 
@@ -84,12 +86,17 @@ const Admin = () => {
         name: college.name,
         location: college.location,
         type: college.type,
-        approvedDate: college.submittedDate.split('T')[0],
+        approvedDate: college.submittedDate?.split('T')[0] || new Date().toISOString().split('T')[0],
         status: 'approved'
       })));
     } catch (error) {
       console.error('Error loading approved colleges:', error);
     }
+  };
+
+  const loadStarNominations = () => {
+    const nominations = notificationService.getNominations();
+    setStarNominations(nominations);
   };
 
   const handleLogin = () => {
@@ -111,7 +118,6 @@ const Admin = () => {
   const handleApprove = async (id: number) => {
     const college = pendingSubmissions.find(c => c.id === id);
     if (college) {
-      // Save to Google Sheets
       const success = await googleSheetsService.submitCollege({
         name: college.name,
         location: college.location,
@@ -168,6 +174,41 @@ const Admin = () => {
     });
   };
 
+  const handleApproveStarNomination = (id: number) => {
+    const nomination = starNominations.find(n => n.id === id);
+    if (nomination) {
+      // Add to starred colleges
+      const newStarredCollege = {
+        id: Date.now(),
+        name: nomination.collegeName,
+        location: "To be updated",
+        type: "To be updated",
+        rating: 4.5,
+        featured: true
+      };
+      
+      setStarredColleges(prev => [...prev, newStarredCollege]);
+      notificationService.updateNominationStatus(id, 'approved');
+      loadStarNominations();
+      
+      toast({
+        title: "Star College Approved",
+        description: `${nomination.collegeName} has been added to starred colleges.`,
+      });
+    }
+  };
+
+  const handleRejectStarNomination = (id: number) => {
+    notificationService.updateNominationStatus(id, 'rejected');
+    loadStarNominations();
+    
+    toast({
+      title: "Star Nomination Rejected",
+      description: "Star college nomination has been rejected.",
+      variant: "destructive",
+    });
+  };
+
   const handleAddStarredCollege = () => {
     const newStarredCollege = {
       id: Date.now(),
@@ -195,6 +236,8 @@ const Admin = () => {
     });
   };
 
+  const pendingNominations = starNominations.filter(n => n.status === 'pending');
+
   const stats = [
     {
       title: "Pending Reviews",
@@ -218,9 +261,9 @@ const Admin = () => {
       bgColor: "bg-blue-100"
     },
     {
-      title: "Total Users",
-      value: "1,234",
-      icon: Users,
+      title: "Star Nominations",
+      value: pendingNominations.length,
+      icon: Bell,
       color: "text-purple-600",
       bgColor: "bg-purple-100"
     }
@@ -315,7 +358,7 @@ const Admin = () => {
 
         {/* Main Content */}
         <Tabs defaultValue="pending" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="pending" className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
               Pending ({pendingSubmissions.length})
@@ -323,6 +366,10 @@ const Admin = () => {
             <TabsTrigger value="approved" className="flex items-center gap-2">
               <Check className="h-4 w-4" />
               Approved ({approvedColleges.length})
+            </TabsTrigger>
+            <TabsTrigger value="nominations" className="flex items-center gap-2">
+              <Bell className="h-4 w-4" />
+              Nominations ({pendingNominations.length})
             </TabsTrigger>
             <TabsTrigger value="starred" className="flex items-center gap-2">
               <Star className="h-4 w-4" />
@@ -392,6 +439,71 @@ const Admin = () => {
                         </Button>
                         <Button
                           onClick={() => handleReject(college.id)}
+                          variant="destructive"
+                          className="flex items-center gap-2"
+                        >
+                          <X className="h-4 w-4" />
+                          Reject
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Star Nominations */}
+          <TabsContent value="nominations" className="space-y-6">
+            {pendingNominations.length === 0 ? (
+              <Card>
+                <CardContent className="py-16 text-center">
+                  <Bell className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-600 mb-2">No Pending Nominations</h3>
+                  <p className="text-gray-500">All star college nominations have been reviewed.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-6">
+                {pendingNominations.map((nomination) => (
+                  <Card key={nomination.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="text-xl flex items-center gap-2">
+                            <Star className="h-5 w-5 text-yellow-500" />
+                            {nomination.collegeName}
+                          </CardTitle>
+                          <CardDescription className="mt-2">
+                            Nominated by: {nomination.nominator}
+                          </CardDescription>
+                        </div>
+                        <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                          <Bell className="h-3 w-3 mr-1" />
+                          New Nomination
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <strong>Reason for nomination:</strong>
+                        <p className="text-gray-700 mt-1">{nomination.reason}</p>
+                      </div>
+                      
+                      <div className="text-sm text-gray-500">
+                        Submitted: {new Date(nomination.timestamp).toLocaleDateString()}
+                      </div>
+
+                      <div className="flex gap-3 pt-4">
+                        <Button
+                          onClick={() => handleApproveStarNomination(nomination.id)}
+                          className="flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700"
+                        >
+                          <Star className="h-4 w-4" />
+                          Make Star College
+                        </Button>
+                        <Button
+                          onClick={() => handleRejectStarNomination(nomination.id)}
                           variant="destructive"
                           className="flex items-center gap-2"
                         >

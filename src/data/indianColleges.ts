@@ -1,0 +1,685 @@
+
+interface IndianCollege {
+  id: number;
+  name: string;
+  location: string;
+  state: string;
+  type: string;
+  rating: number;
+  students: number;
+  description: string;
+  image: string;
+  whatsapp: string;
+  status: 'approved';
+}
+
+export const indianColleges: IndianCollege[] = [
+  // Maharashtra - 10 colleges
+  {
+    id: 1001,
+    name: "Indian Institute of Technology Bombay",
+    location: "Mumbai, Maharashtra",
+    state: "Maharashtra",
+    type: "Public",
+    rating: 4.9,
+    students: 12000,
+    description: "Premier engineering institute known for excellence in technology and innovation.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543210",
+    status: "approved"
+  },
+  {
+    id: 1002,
+    name: "University of Mumbai",
+    location: "Mumbai, Maharashtra",
+    state: "Maharashtra",
+    type: "Public",
+    rating: 4.5,
+    students: 95000,
+    description: "One of India's oldest and largest universities offering diverse academic programs.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543211",
+    status: "approved"
+  },
+  {
+    id: 1003,
+    name: "Pune University",
+    location: "Pune, Maharashtra",
+    state: "Maharashtra",
+    type: "Public",
+    rating: 4.4,
+    students: 85000,
+    description: "Leading university in western India with strong research focus.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543212",
+    status: "approved"
+  },
+  {
+    id: 1004,
+    name: "Indian Institute of Science Education and Research Pune",
+    location: "Pune, Maharashtra",
+    state: "Maharashtra",
+    type: "Public",
+    rating: 4.8,
+    students: 2500,
+    description: "Premier research institute focusing on science and mathematics.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543213",
+    status: "approved"
+  },
+  {
+    id: 1005,
+    name: "Tata Institute of Social Sciences",
+    location: "Mumbai, Maharashtra",
+    state: "Maharashtra",
+    type: "Public",
+    rating: 4.6,
+    students: 8000,
+    description: "Leading institute for social sciences and development studies.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543214",
+    status: "approved"
+  },
+  {
+    id: 1006,
+    name: "College of Engineering Pune",
+    location: "Pune, Maharashtra",
+    state: "Maharashtra",
+    type: "Public",
+    rating: 4.3,
+    students: 4500,
+    description: "Historic engineering college established in 1854.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543215",
+    status: "approved"
+  },
+  {
+    id: 1007,
+    name: "Symbiosis International University",
+    location: "Pune, Maharashtra",
+    state: "Maharashtra",
+    type: "Private",
+    rating: 4.4,
+    students: 35000,
+    description: "Multi-disciplinary university with global outlook.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543216",
+    status: "approved"
+  },
+  {
+    id: 1008,
+    name: "Dr. Babasaheb Ambedkar Marathwada University",
+    location: "Aurangabad, Maharashtra",
+    state: "Maharashtra",
+    type: "Public",
+    rating: 4.1,
+    students: 45000,
+    description: "State university serving the Marathwada region.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543217",
+    status: "approved"
+  },
+  {
+    id: 1009,
+    name: "Shivaji University",
+    location: "Kolhapur, Maharashtra",
+    state: "Maharashtra",
+    type: "Public",
+    rating: 4.2,
+    students: 42000,
+    description: "Multi-faculty university in western Maharashtra.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543218",
+    status: "approved"
+  },
+  {
+    id: 1010,
+    name: "Nagpur University",
+    location: "Nagpur, Maharashtra",
+    state: "Maharashtra",
+    type: "Public",
+    rating: 4.0,
+    students: 38000,
+    description: "Central India's prominent university.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543219",
+    status: "approved"
+  },
+
+  // Delhi - 10 colleges
+  {
+    id: 2001,
+    name: "University of Delhi",
+    location: "New Delhi, Delhi",
+    state: "Delhi",
+    type: "Public",
+    rating: 4.7,
+    students: 75000,
+    description: "Premier central university with diverse academic programs.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543220",
+    status: "approved"
+  },
+  {
+    id: 2002,
+    name: "Indian Institute of Technology Delhi",
+    location: "New Delhi, Delhi",
+    state: "Delhi",
+    type: "Public",
+    rating: 4.9,
+    students: 11000,
+    description: "Top engineering institute with cutting-edge research facilities.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543221",
+    status: "approved"
+  },
+  {
+    id: 2003,
+    name: "Jawaharlal Nehru University",
+    location: "New Delhi, Delhi",
+    state: "Delhi",
+    type: "Public",
+    rating: 4.6,
+    students: 8500,
+    description: "Renowned for social sciences and humanities research.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543222",
+    status: "approved"
+  },
+  {
+    id: 2004,
+    name: "Delhi School of Economics",
+    location: "New Delhi, Delhi",
+    state: "Delhi",
+    type: "Public",
+    rating: 4.8,
+    students: 1200,
+    description: "Premier economics school with global recognition.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543223",
+    status: "approved"
+  },
+  {
+    id: 2005,
+    name: "Lady Shri Ram College",
+    location: "New Delhi, Delhi",
+    state: "Delhi",
+    type: "Public",
+    rating: 4.5,
+    students: 2800,
+    description: "Leading women's college for liberal arts education.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543224",
+    status: "approved"
+  },
+  {
+    id: 2006,
+    name: "St. Stephen's College",
+    location: "New Delhi, Delhi",
+    state: "Delhi",
+    type: "Private",
+    rating: 4.7,
+    students: 1500,
+    description: "Historic college known for academic excellence.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543225",
+    status: "approved"
+  },
+  {
+    id: 2007,
+    name: "Hindu College",
+    location: "New Delhi, Delhi",
+    state: "Delhi",
+    type: "Public",
+    rating: 4.4,
+    students: 3200,
+    description: "Prestigious undergraduate college with rich heritage.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543226",
+    status: "approved"
+  },
+  {
+    id: 2008,
+    name: "Miranda House",
+    location: "New Delhi, Delhi",
+    state: "Delhi",
+    type: "Public",
+    rating: 4.6,
+    students: 2500,
+    description: "Premier women's college under University of Delhi.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543227",
+    status: "approved"
+  },
+  {
+    id: 2009,
+    name: "Hansraj College",
+    location: "New Delhi, Delhi",
+    state: "Delhi",
+    type: "Public",
+    rating: 4.3,
+    students: 2800,
+    description: "Well-established college with strong academic programs.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543228",
+    status: "approved"
+  },
+  {
+    id: 2010,
+    name: "Shri Ram College of Commerce",
+    location: "New Delhi, Delhi",
+    state: "Delhi",
+    type: "Public",
+    rating: 4.5,
+    students: 1800,
+    description: "Top commerce college in India.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543229",
+    status: "approved"
+  },
+
+  // Tamil Nadu - 10 colleges
+  {
+    id: 3001,
+    name: "Indian Institute of Technology Madras",
+    location: "Chennai, Tamil Nadu",
+    state: "Tamil Nadu",
+    type: "Public",
+    rating: 4.9,
+    students: 12500,
+    description: "Premier technical institute with world-class facilities.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543230",
+    status: "approved"
+  },
+  {
+    id: 3002,
+    name: "University of Madras",
+    location: "Chennai, Tamil Nadu",
+    state: "Tamil Nadu",
+    type: "Public",
+    rating: 4.4,
+    students: 85000,
+    description: "One of India's oldest universities founded in 1857.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543231",
+    status: "approved"
+  },
+  {
+    id: 3003,
+    name: "Anna University",
+    location: "Chennai, Tamil Nadu",
+    state: "Tamil Nadu",
+    type: "Public",
+    rating: 4.3,
+    students: 75000,
+    description: "Leading technical university in South India.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543232",
+    status: "approved"
+  },
+  {
+    id: 3004,
+    name: "Indian Institute of Science Education and Research Tirupati",
+    location: "Tirupati, Tamil Nadu",
+    state: "Tamil Nadu",
+    type: "Public",
+    rating: 4.7,
+    students: 1800,
+    description: "Research-focused institute for science and technology.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543233",
+    status: "approved"
+  },
+  {
+    id: 3005,
+    name: "Vellore Institute of Technology",
+    location: "Vellore, Tamil Nadu",
+    state: "Tamil Nadu",
+    type: "Private",
+    rating: 4.2,
+    students: 45000,
+    description: "Private university with strong industry connections.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543234",
+    status: "approved"
+  },
+  {
+    id: 3006,
+    name: "SRM Institute of Science and Technology",
+    location: "Chennai, Tamil Nadu",
+    state: "Tamil Nadu",
+    type: "Private",
+    rating: 4.1,
+    students: 38000,
+    description: "Multi-disciplinary private university.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543235",
+    status: "approved"
+  },
+  {
+    id: 3007,
+    name: "Bharathiar University",
+    location: "Coimbatore, Tamil Nadu",
+    state: "Tamil Nadu",
+    type: "Public",
+    rating: 4.0,
+    students: 32000,
+    description: "State university serving western Tamil Nadu.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543236",
+    status: "approved"
+  },
+  {
+    id: 3008,
+    name: "Madurai Kamaraj University",
+    location: "Madurai, Tamil Nadu",
+    state: "Tamil Nadu",
+    type: "Public",
+    rating: 4.1,
+    students: 35000,
+    description: "Comprehensive university in southern Tamil Nadu.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543237",
+    status: "approved"
+  },
+  {
+    id: 3009,
+    name: "Presidency College Chennai",
+    location: "Chennai, Tamil Nadu",
+    state: "Tamil Nadu",
+    type: "Public",
+    rating: 4.3,
+    students: 3500,
+    description: "Historic college with strong academic tradition.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543238",
+    status: "approved"
+  },
+  {
+    id: 3010,
+    name: "PSG College of Technology",
+    location: "Coimbatore, Tamil Nadu",
+    state: "Tamil Nadu",
+    type: "Private",
+    rating: 4.2,
+    students: 6500,
+    description: "Premier engineering college in Tamil Nadu.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543239",
+    status: "approved"
+  },
+
+  // Karnataka - 10 colleges
+  {
+    id: 4001,
+    name: "Indian Institute of Science",
+    location: "Bangalore, Karnataka",
+    state: "Karnataka",
+    type: "Public",
+    rating: 4.9,
+    students: 4500,
+    description: "India's premier research institute for science and engineering.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543240",
+    status: "approved"
+  },
+  {
+    id: 4002,
+    name: "Indian Institute of Technology Bangalore",
+    location: "Bangalore, Karnataka",
+    state: "Karnataka",
+    type: "Public",
+    rating: 4.8,
+    students: 8500,
+    description: "Top engineering institute with cutting-edge research.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543241",
+    status: "approved"
+  },
+  {
+    id: 4003,
+    name: "Bangalore University",
+    location: "Bangalore, Karnataka",
+    state: "Karnataka",
+    type: "Public",
+    rating: 4.2,
+    students: 65000,
+    description: "Major state university serving Karnataka's capital region.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543242",
+    status: "approved"
+  },
+  {
+    id: 4004,
+    name: "Indian Institute of Management Bangalore",
+    location: "Bangalore, Karnataka",
+    state: "Karnataka",
+    type: "Public",
+    rating: 4.8,
+    students: 1200,
+    description: "Premier management institute with global reputation.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543243",
+    status: "approved"
+  },
+  {
+    id: 4005,
+    name: "National Institute of Mental Health and Neurosciences",
+    location: "Bangalore, Karnataka",
+    state: "Karnataka",
+    type: "Public",
+    rating: 4.7,
+    students: 800,
+    description: "Leading institute for mental health and neurosciences.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543244",
+    status: "approved"
+  },
+  {
+    id: 4006,
+    name: "Manipal Academy of Higher Education",
+    location: "Manipal, Karnataka",
+    state: "Karnataka",
+    type: "Private",
+    rating: 4.3,
+    students: 28000,
+    description: "Multi-disciplinary private university.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543245",
+    status: "approved"
+  },
+  {
+    id: 4007,
+    name: "Christ University",
+    location: "Bangalore, Karnataka",
+    state: "Karnataka",
+    type: "Private",
+    rating: 4.2,
+    students: 25000,
+    description: "Well-known private university with diverse programs.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543246",
+    status: "approved"
+  },
+  {
+    id: 4008,
+    name: "Mysore University",
+    location: "Mysore, Karnataka",
+    state: "Karnataka",
+    type: "Public",
+    rating: 4.1,
+    students: 45000,
+    description: "Historic university founded in 1916.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543247",
+    status: "approved"
+  },
+  {
+    id: 4009,
+    name: "Visvesvaraya Technological University",
+    location: "Belgaum, Karnataka",
+    state: "Karnataka",
+    type: "Public",
+    rating: 4.0,
+    students: 185000,
+    description: "State technological university with wide reach.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543248",
+    status: "approved"
+  },
+  {
+    id: 4010,
+    name: "National Institute of Technology Karnataka",
+    location: "Surathkal, Karnataka",
+    state: "Karnataka",
+    type: "Public",
+    rating: 4.5,
+    students: 8000,
+    description: "Premier engineering institute on the coast of Karnataka.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543249",
+    status: "approved"
+  },
+
+  // West Bengal - 10 colleges
+  {
+    id: 5001,
+    name: "University of Calcutta",
+    location: "Kolkata, West Bengal",
+    state: "West Bengal",
+    type: "Public",
+    rating: 4.4,
+    students: 75000,
+    description: "One of India's oldest modern universities founded in 1857.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543250",
+    status: "approved"
+  },
+  {
+    id: 5002,
+    name: "Jadavpur University",
+    location: "Kolkata, West Bengal",
+    state: "West Bengal",
+    type: "Public",
+    rating: 4.6,
+    students: 12000,
+    description: "Premier university known for engineering and arts programs.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543251",
+    status: "approved"
+  },
+  {
+    id: 5003,
+    name: "Indian Institute of Technology Kharagpur",
+    location: "Kharagpur, West Bengal",
+    state: "West Bengal",
+    type: "Public",
+    rating: 4.8,
+    students: 13000,
+    description: "First IIT established in India with rich heritage.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543252",
+    status: "approved"
+  },
+  {
+    id: 5004,
+    name: "Presidency University",
+    location: "Kolkata, West Bengal",
+    state: "West Bengal",
+    type: "Public",
+    rating: 4.5,
+    students: 8500,
+    description: "Historic institution with notable alumni.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543253",
+    status: "approved"
+  },
+  {
+    id: 5005,
+    name: "Indian Statistical Institute",
+    location: "Kolkata, West Bengal",
+    state: "West Bengal",
+    type: "Public",
+    rating: 4.7,
+    students: 2500,
+    description: "World-renowned institute for statistics and mathematics.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543254",
+    status: "approved"
+  },
+  {
+    id: 5006,
+    name: "West Bengal University of Technology",
+    location: "Kolkata, West Bengal",
+    state: "West Bengal",
+    type: "Public",
+    rating: 4.1,
+    students: 125000,
+    description: "State technological university with numerous affiliated colleges.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543255",
+    status: "approved"
+  },
+  {
+    id: 5007,
+    name: "Visva-Bharati University",
+    location: "Santiniketan, West Bengal",
+    state: "West Bengal",
+    type: "Public",
+    rating: 4.3,
+    students: 8000,
+    description: "Central university founded by Rabindranath Tagore.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543256",
+    status: "approved"
+  },
+  {
+    id: 5008,
+    name: "Burdwan University",
+    location: "Burdwan, West Bengal",
+    state: "West Bengal",
+    type: "Public",
+    rating: 4.0,
+    students: 35000,
+    description: "State university serving central West Bengal.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543257",
+    status: "approved"
+  },
+  {
+    id: 5009,
+    name: "Kalyani University",
+    location: "Kalyani, West Bengal",
+    state: "West Bengal",
+    type: "Public",
+    rating: 3.9,
+    students: 28000,
+    description: "University established to serve Nadia district.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543258",
+    status: "approved"
+  },
+  {
+    id: 5010,
+    name: "Indian Institute of Management Calcutta",
+    location: "Kolkata, West Bengal",
+    state: "West Bengal",
+    type: "Public",
+    rating: 4.8,
+    students: 1100,
+    description: "Top business school in eastern India.",
+    image: "/placeholder.svg",
+    whatsapp: "+919876543259",
+    status: "approved"
+  }
+];
+
+export const getCollegesByState = (state: string) => {
+  return indianColleges.filter(college => college.state === state);
+};
+
+export const getAllStates = () => {
+  const states = [...new Set(indianColleges.map(college => college.state))];
+  return states.sort();
+};
