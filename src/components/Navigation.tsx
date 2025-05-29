@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, Settings, LogOut, GraduationCap, Shield, LogIn } from 'lucide-react';
+import { Menu, X, User, Settings, LogOut, GraduationCap, Shield, LogIn, ChevronDown } from 'lucide-react';
 import { authService } from '@/utils/auth';
 import {
   DropdownMenu,
@@ -38,10 +38,18 @@ const Navigation = () => {
 
   const navItems = [
     { name: 'Home', href: '/', icon: null },
-    { name: 'Colleges', href: '/colleges', icon: null },
-    { name: 'Add Your College', href: '/submit-college', icon: null },
-    { name: 'Profile', href: '/profile', icon: null },
-    { name: 'Admin Panel', href: '/admin', icon: Shield },
+    { name: 'About Us', href: '/about', icon: null },
+    { name: 'Browse Colleges', href: '/colleges', icon: null },
+    { name: 'Blog', href: '/blog', icon: null },
+    { name: 'Help Center', href: '/help-center', icon: null }
+  ];
+
+  const moreItems = [
+    { name: 'Careers', href: '/careers' },
+    { name: 'Contact Us', href: '/contact' },
+    { name: 'Privacy Policy', href: '/privacy-policy' },
+    { name: 'Add Your College', href: '/submit-college' },
+    { name: 'Admin Panel', href: '/admin', icon: Shield }
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -63,7 +71,7 @@ const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden lg:flex items-center space-x-6">
             {navItems.map((item) => (
               <Link
                 key={item.name}
@@ -78,10 +86,35 @@ const Navigation = () => {
                 {item.name}
               </Link>
             ))}
+            
+            {/* More Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">
+                  More <ChevronDown className="h-4 w-4 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end">
+                {moreItems.map((item) => (
+                  <DropdownMenuItem key={item.name} asChild>
+                    <Link to={item.href} className="flex items-center">
+                      {item.icon && <item.icon className="mr-2 h-4 w-4" />}
+                      <span>{item.name}</span>
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
-          {/* User Menu / Auth Buttons - Only show if logged in */}
-          <div className="hidden md:flex items-center space-x-4">
+          {/* CTA Buttons */}
+          <div className="hidden lg:flex items-center space-x-4">
+            <Link to="/create-profile">
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+                Create Profile
+              </Button>
+            </Link>
+            
             {isLoggedIn && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -112,7 +145,7 @@ const Navigation = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <Button
               variant="ghost"
               size="sm"
@@ -126,7 +159,7 @@ const Navigation = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
               {navItems.map((item) => (
                 <Link
@@ -143,9 +176,35 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
+              
+              <div className="pt-2 border-t border-gray-200">
+                <div className="text-xs font-semibold text-gray-500 px-3 py-2 uppercase tracking-wide">
+                  More Pages
+                </div>
+                {moreItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 flex items-center gap-2"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.icon && <item.icon className="h-5 w-5" />}
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+              
               <div className="pt-4 border-t border-gray-200">
+                <Link
+                  to="/create-profile"
+                  className="block w-full text-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-semibold"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Create Profile
+                </Link>
+                
                 {isLoggedIn && (
-                  <div className="space-y-2">
+                  <div className="space-y-2 mt-4">
                     <Link
                       to="/profile"
                       className="flex items-center px-3 py-2 text-gray-700 hover:text-blue-600"
