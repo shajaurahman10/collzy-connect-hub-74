@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { indianColleges, getAllStates } from '@/data/indianColleges';
 import { majorCityColleges } from '@/data/majorCityColleges';
 import { googleSheetsIntegration } from '@/utils/googleSheetsIntegration';
+import { comprehensiveCollegeData, getAllComprehensiveStates } from '@/data/comprehensiveCollegeData';
 
 const Colleges = () => {
   const [colleges, setColleges] = useState([]);
@@ -30,13 +31,13 @@ const Colleges = () => {
       setLoading(true);
       // Try to get colleges from Google Sheets first
       const sheetsColleges = await googleSheetsIntegration.getColleges();
-      // Combine with all local college data
-      const allColleges = [...indianColleges, ...majorCityColleges, ...sheetsColleges];
+      // Combine with all local college data including comprehensive data
+      const allColleges = [...indianColleges, ...majorCityColleges, ...comprehensiveCollegeData, ...sheetsColleges];
       setColleges(allColleges);
     } catch (error) {
       console.error('Error loading colleges:', error);
-      // Fallback to local data
-      setColleges([...indianColleges, ...majorCityColleges]);
+      // Fallback to local data including comprehensive data
+      setColleges([...indianColleges, ...majorCityColleges, ...comprehensiveCollegeData]);
       toast({
         title: "Loading Notice",
         description: "Using local college data. Connect Google Sheets for live updates.",
@@ -138,7 +139,7 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
     setSortBy('name');
   };
 
-  const states = getAllStates();
+  const states = getAllComprehensiveStates();
 
   if (loading) {
     return (
@@ -156,6 +157,9 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
     );
   }
 
+  // Show partnership message for states with no colleges
+  const showPartnershipMessage = selectedState !== 'all' && filteredAndSortedColleges.length === 0 && !searchTerm;
+
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -163,12 +167,12 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
-          <div className="text-center mb-8 lg:mb-12">
+          <div className="text-center mb-8 lg:mb-12 animate-fade-in">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
               Discover Your Perfect College
             </h1>
             <p className="text-lg sm:text-xl text-blue-700 max-w-3xl mx-auto px-4 leading-relaxed">
-              Explore thousands of institutions across India. Find your ideal academic match with our comprehensive search and filtering system.
+              Explore hundreds of institutions across India. Find your ideal academic match with our comprehensive search and filtering system.
             </p>
           </div>
 
@@ -207,26 +211,53 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
               <Button 
                 variant="outline" 
                 onClick={handleClearFilters}
-                className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                className="border-blue-200 text-blue-600 hover:bg-blue-50 hover:scale-105 transition-all duration-200"
               >
                 Clear All Filters
               </Button>
             )}
           </div>
 
+          {/* Partnership Message for States with No Colleges */}
+          {showPartnershipMessage && (
+            <Card className="text-center py-16 sm:py-20 border-orange-200 bg-orange-50/80 backdrop-blur-sm mb-8 animate-fade-in">
+              <CardContent>
+                <Building2 className="h-16 sm:h-20 w-16 sm:w-20 text-orange-400 mx-auto mb-6" />
+                <h3 className="text-xl sm:text-2xl font-semibold text-orange-700 mb-3">
+                  {selectedState} - Coming Soon!
+                </h3>
+                <p className="text-orange-600 mb-8 px-4 max-w-md mx-auto">
+                  We haven't partnered with colleges in {selectedState} yet, but we're working on it! 
+                  Check back soon for updates.
+                </p>
+                <Button 
+                  onClick={handleClearFilters}
+                  className="bg-orange-600 hover:bg-orange-700 hover:scale-105 transition-all duration-200"
+                >
+                  Explore Other States
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Colleges Grid */}
           {filteredAndSortedColleges.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
-              {filteredAndSortedColleges.map((college) => (
-                <CollegeCard
+              {filteredAndSortedColleges.map((college, index) => (
+                <div
                   key={college.id}
-                  college={college}
-                  onApply={() => handleApplyToCollege(college)}
-                  onFavorite={handleFavoriteCollege}
-                />
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  <CollegeCard
+                    college={college}
+                    onApply={() => handleApplyToCollege(college)}
+                    onFavorite={handleFavoriteCollege}
+                  />
+                </div>
               ))}
             </div>
-          ) : (
+          ) : !showPartnershipMessage && (
             <Card className="text-center py-16 sm:py-20 border-blue-200 bg-white/80 backdrop-blur-sm">
               <CardContent>
                 <Building2 className="h-16 sm:h-20 w-16 sm:w-20 text-blue-300 mx-auto mb-6" />
@@ -236,7 +267,7 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
                 </p>
                 <Button 
                   onClick={handleClearFilters}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-blue-600 hover:bg-blue-700 hover:scale-105 transition-all duration-200"
                 >
                   Clear All Filters
                 </Button>

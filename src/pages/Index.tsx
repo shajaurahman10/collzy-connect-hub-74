@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { googleSheetsService } from '@/utils/googleSheets';
 import { indianColleges, getAllStates } from '@/data/indianColleges';
 import { majorCityColleges } from '@/data/majorCityColleges';
+import { comprehensiveCollegeData, getAllComprehensiveStates } from '@/data/comprehensiveCollegeData';
 
 const Index = () => {
   const [colleges, setColleges] = useState([]);
@@ -27,13 +28,13 @@ const Index = () => {
   const loadColleges = async () => {
     try {
       const approvedColleges = await googleSheetsService.getColleges('approved');
-      // Combine all college data sources
-      const allColleges = [...indianColleges, ...majorCityColleges, ...approvedColleges];
+      // Combine all college data sources including comprehensive data
+      const allColleges = [...indianColleges, ...majorCityColleges, ...comprehensiveCollegeData, ...approvedColleges];
       setColleges(allColleges);
     } catch (error) {
       console.error('Error loading colleges:', error);
-      // Fallback to combined local data
-      setColleges([...indianColleges, ...majorCityColleges]);
+      // Fallback to combined local data including comprehensive data
+      setColleges([...indianColleges, ...majorCityColleges, ...comprehensiveCollegeData]);
     }
   };
 
@@ -79,7 +80,7 @@ A prospective student from Collzy 🌟`;
     });
   };
 
-  const states = getAllStates();
+  const states = getAllComprehensiveStates();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -90,14 +91,14 @@ A prospective student from Collzy 🌟`;
       {/* Search and Filter Section */}
       <section className="py-12 sm:py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8 sm:mb-12">
+          <div className="text-center mb-8 sm:mb-12 animate-fade-in">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Discover Indian Colleges</h2>
             <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
               Explore top colleges and universities across India. Find the perfect match for your academic journey.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 animate-fade-in">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -105,7 +106,7 @@ A prospective student from Collzy 🌟`;
                   placeholder="Search colleges, universities, or locations..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-10 sm:h-12 text-base sm:text-lg"
+                  className="pl-10 h-10 sm:h-12 text-base sm:text-lg transition-all duration-200"
                 />
               </div>
               
@@ -113,7 +114,7 @@ A prospective student from Collzy 🌟`;
                 <select
                   value={selectedState}
                   onChange={(e) => setSelectedState(e.target.value)}
-                  className="h-10 sm:h-12 px-3 sm:px-4 border border-gray-300 rounded-md bg-white text-sm sm:text-base"
+                  className="h-10 sm:h-12 px-3 sm:px-4 border border-gray-300 rounded-md bg-white text-sm sm:text-base transition-all duration-200"
                 >
                   <option value="all">All States</option>
                   {states.map(state => (
@@ -121,24 +122,25 @@ A prospective student from Collzy 🌟`;
                   ))}
                 </select>
                 
+                {/* Filter Buttons */}
                 <Button
                   variant={filterType === 'all' ? 'default' : 'outline'}
                   onClick={() => setFilterType('all')}
-                  className="h-10 sm:h-12 text-sm sm:text-base px-3 sm:px-4"
+                  className="h-10 sm:h-12 text-sm sm:text-base px-3 sm:px-4 hover:scale-105 transition-all duration-200"
                 >
                   All
                 </Button>
                 <Button
                   variant={filterType === 'private' ? 'default' : 'outline'}
                   onClick={() => setFilterType('private')}
-                  className="h-10 sm:h-12 text-sm sm:text-base px-3 sm:px-4"
+                  className="h-10 sm:h-12 text-sm sm:text-base px-3 sm:px-4 hover:scale-105 transition-all duration-200"
                 >
                   Private
                 </Button>
                 <Button
                   variant={filterType === 'public' ? 'default' : 'outline'}
                   onClick={() => setFilterType('public')}
-                  className="h-10 sm:h-12 text-sm sm:text-base px-3 sm:px-4"
+                  className="h-10 sm:h-12 text-sm sm:text-base px-3 sm:px-4 hover:scale-105 transition-all duration-200"
                 >
                   Public
                 </Button>
@@ -148,13 +150,18 @@ A prospective student from Collzy 🌟`;
 
           {/* Colleges Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
-            {filteredColleges.slice(0, 50).map((college) => (
-              <CollegeCard
+            {filteredColleges.slice(0, 50).map((college, index) => (
+              <div
                 key={college.id}
-                college={college}
-                onApply={() => handleApplyToCollege(college)}
-                onFavorite={handleFavoriteCollege}
-              />
+                className="animate-fade-in"
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
+                <CollegeCard
+                  college={college}
+                  onApply={() => handleApplyToCollege(college)}
+                  onFavorite={handleFavoriteCollege}
+                />
+              </div>
             ))}
           </div>
 

@@ -42,8 +42,20 @@ const SearchFilters = ({
     return colleges.filter(c => c.type.toLowerCase() === type && c.status === 'approved').length;
   };
 
+  const getStateCollegeCount = (state: string) => {
+    return colleges.filter(c => c.state === state && c.status === 'approved').length;
+  };
+
+  const allIndianStates = [
+    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+    "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir",
+    "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
+    "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim",
+    "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"
+  ];
+
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-blue-100 p-4 sm:p-6 mb-6 sm:mb-8">
+    <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-blue-100 p-4 sm:p-6 mb-6 sm:mb-8 animate-fade-in">
       <div className="space-y-4">
         {/* Main Search Row */}
         <div className="flex flex-col lg:flex-row gap-4">
@@ -53,12 +65,12 @@ const SearchFilters = ({
               placeholder="Search colleges by name, location, or state..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-12 h-12 text-lg border-blue-200 focus:border-blue-400 focus:ring-blue-200 rounded-xl"
+              className="pl-12 h-12 text-lg border-blue-200 focus:border-blue-400 focus:ring-blue-200 rounded-xl transition-all duration-200"
             />
             {searchTerm && (
               <button
                 onClick={() => onSearchChange('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -67,7 +79,7 @@ const SearchFilters = ({
           <Button
             variant="outline"
             onClick={onToggleFilters}
-            className={`h-12 px-6 border-blue-200 transition-all duration-200 ${
+            className={`h-12 px-6 border-blue-200 transition-all duration-200 hover:scale-105 ${
               showFilters 
                 ? 'bg-blue-50 border-blue-300 text-blue-700' 
                 : 'text-blue-600 hover:bg-blue-50'
@@ -83,7 +95,7 @@ const SearchFilters = ({
         <div className="flex flex-wrap gap-2">
           <Badge 
             variant={filterType === 'all' ? 'default' : 'outline'} 
-            className={`cursor-pointer transition-all duration-200 ${
+            className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
               filterType === 'all' 
                 ? 'bg-blue-600 hover:bg-blue-700' 
                 : 'hover:bg-blue-50 border-blue-200'
@@ -94,7 +106,7 @@ const SearchFilters = ({
           </Badge>
           <Badge 
             variant={filterType === 'private' ? 'default' : 'outline'} 
-            className={`cursor-pointer transition-all duration-200 ${
+            className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
               filterType === 'private' 
                 ? 'bg-blue-600 hover:bg-blue-700' 
                 : 'hover:bg-blue-50 border-blue-200'
@@ -105,7 +117,7 @@ const SearchFilters = ({
           </Badge>
           <Badge 
             variant={filterType === 'public' ? 'default' : 'outline'} 
-            className={`cursor-pointer transition-all duration-200 ${
+            className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
               filterType === 'public' 
                 ? 'bg-blue-600 hover:bg-blue-700' 
                 : 'hover:bg-blue-50 border-blue-200'
@@ -118,18 +130,23 @@ const SearchFilters = ({
 
         {/* Extended Filters */}
         {showFilters && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-blue-100">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-blue-100 animate-fade-in">
             <div>
               <label className="text-sm font-medium text-blue-800 mb-2 block">State/Region</label>
               <Select value={selectedState} onValueChange={onStateChange}>
-                <SelectTrigger className="border-blue-200 focus:border-blue-400">
+                <SelectTrigger className="border-blue-200 focus:border-blue-400 transition-all duration-200">
                   <SelectValue placeholder="All States" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-60">
                   <SelectItem value="all">All States</SelectItem>
-                  {states.map(state => (
-                    <SelectItem key={state} value={state}>{state}</SelectItem>
-                  ))}
+                  {allIndianStates.map(state => {
+                    const collegeCount = getStateCollegeCount(state);
+                    return (
+                      <SelectItem key={state} value={state}>
+                        {state} {collegeCount === 0 ? '(Not partnered yet)' : `(${collegeCount})`}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
@@ -137,7 +154,7 @@ const SearchFilters = ({
             <div>
               <label className="text-sm font-medium text-blue-800 mb-2 block">Institution Type</label>
               <Select value={filterType} onValueChange={onFilterTypeChange}>
-                <SelectTrigger className="border-blue-200 focus:border-blue-400">
+                <SelectTrigger className="border-blue-200 focus:border-blue-400 transition-all duration-200">
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
@@ -152,7 +169,7 @@ const SearchFilters = ({
             <div>
               <label className="text-sm font-medium text-blue-800 mb-2 block">Sort By</label>
               <Select value={sortBy} onValueChange={onSortChange}>
-                <SelectTrigger className="border-blue-200 focus:border-blue-400">
+                <SelectTrigger className="border-blue-200 focus:border-blue-400 transition-all duration-200">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -168,7 +185,7 @@ const SearchFilters = ({
               <Button 
                 variant="outline" 
                 onClick={onClearFilters}
-                className="w-full border-blue-200 text-blue-700 hover:bg-blue-50"
+                className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 hover:scale-105 transition-all duration-200"
               >
                 Clear All Filters
               </Button>

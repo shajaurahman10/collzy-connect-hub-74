@@ -129,12 +129,12 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
   };
 
   return (
-    <Card className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden bg-white h-full flex flex-col border-0 shadow-lg">
+    <Card className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden bg-white h-full flex flex-col border-0 shadow-lg animate-fade-in">
       <CardHeader className="pb-3 px-4 sm:px-6 pt-4 sm:pt-6 relative">
         <div className="absolute top-3 right-3">
           <button
             onClick={handleFavoriteClick}
-            className="p-2 bg-white/95 backdrop-blur-sm rounded-full hover:bg-white transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="p-2 bg-white/95 backdrop-blur-sm rounded-full hover:bg-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
           >
             <Heart 
               className={`h-5 w-5 transition-all duration-200 ${
@@ -147,14 +147,14 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
         </div>
         
         <div className="absolute top-3 left-3">
-          <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-0 shadow-sm">
+          <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-0 shadow-sm animate-scale-in">
             {college.type}
           </Badge>
         </div>
         
         {college.founded && (
           <div className="absolute top-3 left-20">
-            <Badge variant="outline" className="bg-blue-600 text-white border-0 text-xs">
+            <Badge variant="outline" className="bg-blue-600 text-white border-0 text-xs animate-scale-in">
               Est. {college.founded}
             </Badge>
           </div>
@@ -192,7 +192,7 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
         {/* Primary Apply Button */}
         <Button 
           onClick={college.email ? handleEmailApply : onApply}
-          className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-md hover:shadow-lg h-10"
+          className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-md hover:shadow-lg h-10 hover:scale-105"
         >
           <Send className="h-4 w-4 mr-2" />
           Apply Now
@@ -205,7 +205,7 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
             size="sm" 
             onClick={handleCallClick}
             disabled={!college.phone}
-            className="h-9 border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-xs"
+            className="h-9 border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-xs hover:scale-105 transition-all duration-200"
           >
             <Phone className="h-3 w-3 mr-1" />
             Call
@@ -216,7 +216,7 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
             size="sm" 
             onClick={handleWebsiteClick}
             disabled={!college.website}
-            className="h-9 border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-xs"
+            className="h-9 border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-xs hover:scale-105 transition-all duration-200"
           >
             <Globe className="h-3 w-3 mr-1" />
             Website
@@ -227,7 +227,7 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
             size="sm" 
             onClick={handleMoreInfoClick}
             disabled={!college.brochure && !college.website}
-            className="h-9 border-gray-200 hover:border-orange-300 hover:bg-orange-50 text-xs"
+            className="h-9 border-gray-200 hover:border-orange-300 hover:bg-orange-50 text-xs hover:scale-105 transition-all duration-200"
           >
             <FileText className="h-3 w-3 mr-1" />
             Info
