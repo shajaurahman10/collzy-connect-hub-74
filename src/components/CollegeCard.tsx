@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, MapPin, Users, Heart, Globe, Phone, FileText, Send } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 interface CollegeCardProps {
   college: {
@@ -29,6 +30,7 @@ interface CollegeCardProps {
 
 const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
   const [isFavorited, setIsFavorited] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem('favoriteColleges') || '[]');
@@ -81,55 +83,84 @@ const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
     const subject = `Admission Inquiry - ${college.name}`;
     const body = `Dear Admission Team,
 
-I hope this email finds you well. I am writing to inquire about admission opportunities at ${college.name}.
+I hope this email finds you well. I am writing to inquire about admission opportunities at ${college.name} through Collzy platform.
 
-I would greatly appreciate detailed information about:
+STUDENT PROFILE:
+- Name: [Your Full Name]
+- Email: [Your Email]
+- Phone: [Your Phone Number]
+- Academic Background: [Your Current Education Level]
+- Preferred Course: [Course of Interest]
+
+DETAILED INQUIRY:
 
 📚 Available Courses & Programs:
-- Course offerings and specializations
-- Eligibility criteria and prerequisites
-- Duration and curriculum details
+- Course offerings and specializations available
+- Eligibility criteria and prerequisites for admission
+- Duration and detailed curriculum structure
+- Faculty qualifications and student-teacher ratio
 
-💰 Fee Structure:
-- Tuition fees (semester/annual)
-- Additional charges (lab, library, sports, etc.)
-- Payment schedule and options
-- Scholarship opportunities
+💰 Complete Fee Structure:
+- Tuition fees (semester/annual breakdown)
+- Additional charges (lab, library, sports, development fees)
+- Payment schedule and installment options
+- Scholarship opportunities and eligibility criteria
+- Financial aid programs available
 
-🏠 Accommodation:
-- Hostel facilities and availability
-- Hostel fees and room types
+🏠 Accommodation Details:
+- Hostel facilities and room availability
+- Hostel fees and different room types (single/double/triple sharing)
 - Mess facilities and food arrangements
-- Safety and security measures
+- Safety and security measures on campus
+- Nearby accommodation options if hostel unavailable
 
 📋 Admission Process:
-- Application deadlines and procedure
-- Entrance exams (if any)
-- Required documents
-- Selection criteria
+- Application deadlines and important dates
+- Entrance exams required (if any)
+- List of required documents for application
+- Selection criteria and merit process
+- Interview process (if applicable)
 
-🎯 Additional Information:
-- Campus facilities and infrastructure
-- Faculty qualifications and student-teacher ratio
-- Placement opportunities and statistics
-- Extracurricular activities
+🎯 Campus & Placement Information:
+- Campus facilities and infrastructure details
+- Library, laboratory, and sports facilities
+- Placement opportunities and statistics for recent years
+- Industry partnerships and internship programs
+- Alumni network and career support services
 
-I am very interested in joining your esteemed institution and would be grateful for a prompt response. Please let me know if you need any additional information from my side.
+🌟 Extracurricular Activities:
+- Student clubs and societies available
+- Sports and cultural activities
+- Annual events and festivals
+- Leadership opportunities
 
-Thank you for your time and consideration.
+I am very interested in joining your esteemed institution and would be grateful for a comprehensive response. Please let me know if you need any additional information from my side or if there's a convenient time for a campus visit.
+
+Thank you for your time and consideration. I look forward to hearing from you soon.
 
 Best regards,
+[Your Name]
 Prospective Student
-(Via Collzy Platform)
 
-Note: This inquiry was sent through Collzy - India's leading college discovery platform.`;
+--
+This inquiry was sent through Collzy - India's premier college discovery platform
+Visit: www.collzy.com | Connect with 500+ institutions nationwide
+
+Note: Please reply to this email for direct communication. We recommend checking your email regularly for admission updates.`;
 
     const mailtoLink = `mailto:${college.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(mailtoLink, '_self');
+    
+    // Show success message
+    toast({
+      title: "🎉 Application Sent Successfully!",
+      description: "Check your email frequently to connect with the college. Don't forget to share Collzy with friends!",
+      duration: 6000,
+    });
   };
 
   return (
-    <Card className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden bg-white h-full flex flex-col border-0 shadow-lg animate-fade-in">
+    <Card className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden bg-white h-full flex flex-col border-0 shadow-lg animate-fade-in hover:scale-105">
       <CardHeader className="pb-3 px-4 sm:px-6 pt-4 sm:pt-6 relative">
         <div className="absolute top-3 right-3">
           <button
@@ -189,26 +220,26 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
       </CardContent>
 
       <CardFooter className="pt-0 px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 mt-auto">
-        {/* Primary Apply Button */}
+        {/* Primary Apply Button - Full Width */}
         <Button 
           onClick={college.email ? handleEmailApply : onApply}
-          className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-md hover:shadow-lg h-10 hover:scale-105"
+          className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-md hover:shadow-lg h-12 hover:scale-105 text-base font-semibold"
         >
-          <Send className="h-4 w-4 mr-2" />
+          <Send className="h-5 w-5 mr-2" />
           Apply Now
         </Button>
         
-        {/* Secondary Action Buttons */}
-        <div className="grid grid-cols-3 gap-2 w-full">
+        {/* 2x2 Grid for Secondary Buttons */}
+        <div className="grid grid-cols-2 gap-3 w-full">
           <Button 
             variant="outline" 
             size="sm" 
             onClick={handleCallClick}
             disabled={!college.phone}
-            className="h-9 border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-xs hover:scale-105 transition-all duration-200"
+            className="h-12 border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-sm hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center p-2"
           >
-            <Phone className="h-3 w-3 mr-1" />
-            Call
+            <Phone className="h-4 w-4 mb-1" />
+            <span className="text-xs">Call</span>
           </Button>
           
           <Button 
@@ -216,10 +247,10 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
             size="sm" 
             onClick={handleWebsiteClick}
             disabled={!college.website}
-            className="h-9 border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-xs hover:scale-105 transition-all duration-200"
+            className="h-12 border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-sm hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center p-2"
           >
-            <Globe className="h-3 w-3 mr-1" />
-            Website
+            <Globe className="h-4 w-4 mb-1" />
+            <span className="text-xs">Website</span>
           </Button>
           
           <Button 
@@ -227,10 +258,10 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
             size="sm" 
             onClick={handleMoreInfoClick}
             disabled={!college.brochure && !college.website}
-            className="h-9 border-gray-200 hover:border-orange-300 hover:bg-orange-50 text-xs hover:scale-105 transition-all duration-200"
+            className="h-12 border-gray-200 hover:border-orange-300 hover:bg-orange-50 text-sm hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center p-2 col-span-2"
           >
-            <FileText className="h-3 w-3 mr-1" />
-            Info
+            <FileText className="h-4 w-4 mb-1" />
+            <span className="text-xs">More Info</span>
           </Button>
         </div>
       </CardFooter>

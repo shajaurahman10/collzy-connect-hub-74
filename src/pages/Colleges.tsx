@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ import { indianColleges, getAllStates } from '@/data/indianColleges';
 import { majorCityColleges } from '@/data/majorCityColleges';
 import { googleSheetsIntegration } from '@/utils/googleSheetsIntegration';
 import { comprehensiveCollegeData, getAllComprehensiveStates } from '@/data/comprehensiveCollegeData';
+import { privateColleges } from '@/data/privateColleges';
 
 const Colleges = () => {
   const [colleges, setColleges] = useState([]);
@@ -31,13 +33,13 @@ const Colleges = () => {
       setLoading(true);
       // Try to get colleges from Google Sheets first
       const sheetsColleges = await googleSheetsIntegration.getColleges();
-      // Combine with all local college data including comprehensive data
-      const allColleges = [...indianColleges, ...majorCityColleges, ...comprehensiveCollegeData, ...sheetsColleges];
+      // Combine with all local college data including comprehensive data and private colleges
+      const allColleges = [...indianColleges, ...majorCityColleges, ...comprehensiveCollegeData, ...privateColleges, ...sheetsColleges];
       setColleges(allColleges);
     } catch (error) {
       console.error('Error loading colleges:', error);
-      // Fallback to local data including comprehensive data
-      setColleges([...indianColleges, ...majorCityColleges, ...comprehensiveCollegeData]);
+      // Fallback to local data including comprehensive data and private colleges
+      setColleges([...indianColleges, ...majorCityColleges, ...comprehensiveCollegeData, ...privateColleges]);
       toast({
         title: "Loading Notice",
         description: "Using local college data. Connect Google Sheets for live updates.",
@@ -172,7 +174,7 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
               Discover Your Perfect College
             </h1>
             <p className="text-lg sm:text-xl text-blue-700 max-w-3xl mx-auto px-4 leading-relaxed">
-              Explore hundreds of institutions across India. Find your ideal academic match with our comprehensive search and filtering system.
+              Explore 500+ institutions across India. Find your ideal academic match with our comprehensive search and filtering system.
             </p>
           </div>
 
