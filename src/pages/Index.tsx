@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,7 @@ import CollegeCard from '@/components/CollegeCard';
 import { useToast } from '@/hooks/use-toast';
 import { googleSheetsService } from '@/utils/googleSheets';
 import { indianColleges, getAllStates } from '@/data/indianColleges';
+import { majorCityColleges } from '@/data/majorCityColleges';
 
 const Index = () => {
   const [colleges, setColleges] = useState([]);
@@ -27,13 +27,13 @@ const Index = () => {
   const loadColleges = async () => {
     try {
       const approvedColleges = await googleSheetsService.getColleges('approved');
-      // Combine Indian colleges with any other approved colleges
-      const allColleges = [...indianColleges, ...approvedColleges];
+      // Combine all college data sources
+      const allColleges = [...indianColleges, ...majorCityColleges, ...approvedColleges];
       setColleges(allColleges);
     } catch (error) {
       console.error('Error loading colleges:', error);
-      // Fallback to Indian colleges
-      setColleges(indianColleges);
+      // Fallback to combined local data
+      setColleges([...indianColleges, ...majorCityColleges]);
     }
   };
 
@@ -46,7 +46,23 @@ const Index = () => {
   });
 
   const handleApplyToCollege = (college) => {
-    const message = `Hi! I'm interested in applying to ${college.name}. Could you please provide me with more information about the admission process and requirements? Thank you!`;
+    const message = `🎓 Hello! I found your college through Collzy platform and I'm very interested in applying to ${college.name}.
+
+Could you please provide me with detailed information about:
+
+📚 Course details and eligibility criteria
+💰 Fee structure (tuition + other charges)
+🏠 Hostel facilities and accommodation fees
+📅 Admission process and important dates
+📋 Required documents for application
+🎯 Placement opportunities and statistics
+🏛️ Campus facilities and infrastructure
+
+I'm excited to learn more about your institution. Thank you for your time!
+
+Best regards,
+A prospective student from Collzy 🌟`;
+
     const whatsappUrl = `https://wa.me/${college.whatsapp}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
     
@@ -189,7 +205,7 @@ const Index = () => {
                 </div>
                 <CardTitle className="text-lg sm:text-xl">Easy Applications</CardTitle>
                 <CardDescription className="text-sm sm:text-base">
-                  Apply to colleges with just one click through our integrated WhatsApp communication system.
+                  Apply to colleges with just one click through our integrated communication system.
                 </CardDescription>
               </CardHeader>
             </Card>

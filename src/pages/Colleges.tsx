@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ import SearchFilters from '@/components/SearchFilters';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { indianColleges, getAllStates } from '@/data/indianColleges';
+import { majorCityColleges } from '@/data/majorCityColleges';
 import { googleSheetsIntegration } from '@/utils/googleSheetsIntegration';
 
 const Colleges = () => {
@@ -30,13 +30,13 @@ const Colleges = () => {
       setLoading(true);
       // Try to get colleges from Google Sheets first
       const sheetsColleges = await googleSheetsIntegration.getColleges();
-      // Combine with Indian colleges data
-      const allColleges = [...indianColleges, ...sheetsColleges];
+      // Combine with all local college data
+      const allColleges = [...indianColleges, ...majorCityColleges, ...sheetsColleges];
       setColleges(allColleges);
     } catch (error) {
       console.error('Error loading colleges:', error);
-      // Fallback to Indian colleges only
-      setColleges(indianColleges);
+      // Fallback to local data
+      setColleges([...indianColleges, ...majorCityColleges]);
       toast({
         title: "Loading Notice",
         description: "Using local college data. Connect Google Sheets for live updates.",
@@ -76,18 +76,44 @@ const Colleges = () => {
 
 Could you please provide me with detailed information about:
 
-📚 Course details and eligibility criteria
-💰 Fee structure (tuition + other charges)
-🏠 Hostel facilities and accommodation fees
-📅 Admission process and important dates
-📋 Required documents for application
-🎯 Placement opportunities and statistics
-🏛️ Campus facilities and infrastructure
+📚 Available Courses & Programs:
+- Course offerings and specializations
+- Eligibility criteria and prerequisites
+- Duration and curriculum details
 
-I'm excited to learn more about your institution. Thank you for your time!
+💰 Fee Structure:
+- Tuition fees (semester/annual)
+- Additional charges (lab, library, sports, etc.)
+- Payment schedule and options
+- Scholarship opportunities
+
+🏠 Accommodation:
+- Hostel facilities and availability
+- Hostel fees and room types
+- Mess facilities and food arrangements
+- Safety and security measures
+
+📋 Admission Process:
+- Application deadlines and procedure
+- Entrance exams (if any)
+- Required documents
+- Selection criteria
+
+🎯 Additional Information:
+- Campus facilities and infrastructure
+- Faculty qualifications and student-teacher ratio
+- Placement opportunities and statistics
+- Extracurricular activities
+
+I am very interested in joining your esteemed institution and would be grateful for a prompt response. Please let me know if you need any additional information from my side.
+
+Thank you for your time and consideration.
 
 Best regards,
-A prospective student from Collzy 🌟`;
+Prospective Student
+(Via Collzy Platform)
+
+Note: This inquiry was sent through Collzy - India's leading college discovery platform.`;
 
     const whatsappUrl = `https://wa.me/${college.whatsapp}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
