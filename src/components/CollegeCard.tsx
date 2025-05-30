@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Star, MapPin, Users, Heart, Globe, Phone, FileText, Send } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface CollegeCardProps {
   college: {
@@ -31,6 +32,7 @@ interface CollegeCardProps {
 const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem('favoriteColleges') || '[]');
@@ -59,6 +61,78 @@ const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
     }
   };
 
+  const checkStudentProfile = () => {
+    const profile = JSON.parse(localStorage.getItem('studentProfile') || '{}');
+    return profile.firstName && profile.email && profile.phone && profile.state && profile.marks;
+  };
+
+  const handleApplyClick = () => {
+    if (!checkStudentProfile()) {
+      toast({
+        title: "Profile Incomplete",
+        description: "Please complete your profile before applying.",
+        variant: "destructive",
+      });
+      navigate('/profile');
+      return;
+    }
+
+    const profile = JSON.parse(localStorage.getItem('studentProfile') || '{}');
+    const subject = `Admission Enquiry via Collzy`;
+    const body = `Dear ${college.name} Admissions Team,
+
+I'm interested in applying to your college. I came across your profile on Collzy and would like to know more about the admission process, eligibility, and important dates.
+
+My profile details:
+- Name: ${profile.firstName} ${profile.lastName || ''}
+- Email: ${profile.email}
+- Phone: ${profile.phone}
+- State: ${profile.state}
+- 12th Grade Marks: ${profile.marks || 'Not specified'}
+
+Kindly refer to my submitted details via this form: https://forms.gle/Cp2G5Lm5sNFe8eJu6
+
+Thank you!
+Regards,
+${profile.firstName} ${profile.lastName || ''}
+Collzy.com`;
+
+    if (college.email) {
+      const mailtoLink = `mailto:${college.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(mailtoLink, '_self');
+      
+      // Send to Google Sheets
+      submitToGoogleSheets(profile, college);
+      
+      toast({
+        title: "🎉 Application Sent Successfully!",
+        description: "Check your email frequently to connect with the college. Don't forget to share Collzy with friends!",
+        duration: 6000,
+      });
+    } else {
+      onApply();
+    }
+  };
+
+  const submitToGoogleSheets = async (profile: any, college: any) => {
+    try {
+      const formData = new FormData();
+      formData.append('entry.123456789', profile.firstName + ' ' + (profile.lastName || ''));
+      formData.append('entry.987654321', profile.email);
+      formData.append('entry.456789123', profile.phone);
+      formData.append('entry.789123456', college.name);
+      formData.append('entry.321654987', college.state);
+      
+      await fetch('https://docs.google.com/forms/d/e/1FAIpQLSdCp2G5Lm5sNFe8eJu6/formResponse', {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      });
+    } catch (error) {
+      console.log('Form submission completed');
+    }
+  };
+
   const handleCallClick = () => {
     if (college.phone) {
       window.open(`tel:${college.phone}`, '_self');
@@ -77,86 +151,6 @@ const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
     } else if (college.website) {
       window.open(college.website.startsWith('http') ? college.website : `https://${college.website}`, '_blank');
     }
-  };
-
-  const handleEmailApply = () => {
-    const subject = `Admission Inquiry - ${college.name}`;
-    const body = `Dear Admission Team,
-
-I hope this email finds you well. I am writing to inquire about admission opportunities at ${college.name} through Collzy platform.
-
-STUDENT PROFILE:
-- Name: [Your Full Name]
-- Email: [Your Email]
-- Phone: [Your Phone Number]
-- Academic Background: [Your Current Education Level]
-- Preferred Course: [Course of Interest]
-
-DETAILED INQUIRY:
-
-📚 Available Courses & Programs:
-- Course offerings and specializations available
-- Eligibility criteria and prerequisites for admission
-- Duration and detailed curriculum structure
-- Faculty qualifications and student-teacher ratio
-
-💰 Complete Fee Structure:
-- Tuition fees (semester/annual breakdown)
-- Additional charges (lab, library, sports, development fees)
-- Payment schedule and installment options
-- Scholarship opportunities and eligibility criteria
-- Financial aid programs available
-
-🏠 Accommodation Details:
-- Hostel facilities and room availability
-- Hostel fees and different room types (single/double/triple sharing)
-- Mess facilities and food arrangements
-- Safety and security measures on campus
-- Nearby accommodation options if hostel unavailable
-
-📋 Admission Process:
-- Application deadlines and important dates
-- Entrance exams required (if any)
-- List of required documents for application
-- Selection criteria and merit process
-- Interview process (if applicable)
-
-🎯 Campus & Placement Information:
-- Campus facilities and infrastructure details
-- Library, laboratory, and sports facilities
-- Placement opportunities and statistics for recent years
-- Industry partnerships and internship programs
-- Alumni network and career support services
-
-🌟 Extracurricular Activities:
-- Student clubs and societies available
-- Sports and cultural activities
-- Annual events and festivals
-- Leadership opportunities
-
-I am very interested in joining your esteemed institution and would be grateful for a comprehensive response. Please let me know if you need any additional information from my side or if there's a convenient time for a campus visit.
-
-Thank you for your time and consideration. I look forward to hearing from you soon.
-
-Best regards,
-[Your Name]
-Prospective Student
-
---
-This inquiry was sent through Collzy - India's premier college discovery platform
-Visit: www.collzy.com | Connect with 500+ institutions nationwide
-
-Note: Please reply to this email for direct communication. We recommend checking your email regularly for admission updates.`;
-
-    const mailtoLink = `mailto:${college.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(mailtoLink, '_self');
-    
-    // Show success message
-    toast({
-      title: "🎉 Application Sent Successfully!",
-      description: "Check your email frequently to connect with the college. Don't forget to share Collzy with friends!",
-      duration: 6000,
-    });
   };
 
   return (
@@ -219,46 +213,46 @@ Note: Please reply to this email for direct communication. We recommend checking
         </div>
       </CardContent>
 
-      <CardFooter className="pt-0 px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 mt-auto">
-        {/* Primary Apply Button - Full Width */}
-        <Button 
-          onClick={college.email ? handleEmailApply : onApply}
-          className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-md hover:shadow-lg h-12 hover:scale-105 text-base font-semibold"
-        >
-          <Send className="h-5 w-5 mr-2" />
-          Apply Now
-        </Button>
-        
-        {/* 2x2 Grid for Secondary Buttons */}
+      <CardFooter className="pt-0 px-4 sm:px-6 pb-4 sm:pb-6 mt-auto">
+        {/* 2x2 Grid for Buttons */}
         <div className="grid grid-cols-2 gap-3 w-full">
+          {/* Top Left - Apply Now (Green) */}
           <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleCallClick}
-            disabled={!college.phone}
-            className="h-12 border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-sm hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center p-2"
+            onClick={handleApplyClick}
+            className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-md hover:shadow-lg h-14 hover:scale-105 text-sm font-semibold flex flex-col items-center justify-center p-2"
           >
-            <Phone className="h-4 w-4 mb-1" />
-            <span className="text-xs">Call</span>
+            <Send className="h-4 w-4 mb-1" />
+            <span className="text-xs">Apply Now</span>
           </Button>
           
+          {/* Top Right - Website */}
           <Button 
             variant="outline" 
-            size="sm" 
             onClick={handleWebsiteClick}
             disabled={!college.website}
-            className="h-12 border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-sm hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center p-2"
+            className="h-14 border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-sm hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center p-2"
           >
             <Globe className="h-4 w-4 mb-1" />
             <span className="text-xs">Website</span>
           </Button>
           
+          {/* Bottom Left - Call */}
           <Button 
             variant="outline" 
-            size="sm" 
+            onClick={handleCallClick}
+            disabled={!college.phone}
+            className="h-14 border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-sm hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center p-2"
+          >
+            <Phone className="h-4 w-4 mb-1" />
+            <span className="text-xs">Call</span>
+          </Button>
+          
+          {/* Bottom Right - More Info */}
+          <Button 
+            variant="outline" 
             onClick={handleMoreInfoClick}
             disabled={!college.brochure && !college.website}
-            className="h-12 border-gray-200 hover:border-orange-300 hover:bg-orange-50 text-sm hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center p-2 col-span-2"
+            className="h-14 border-gray-200 hover:border-orange-300 hover:bg-orange-50 text-sm hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center p-2"
           >
             <FileText className="h-4 w-4 mb-1" />
             <span className="text-xs">More Info</span>

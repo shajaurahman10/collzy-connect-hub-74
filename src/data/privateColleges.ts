@@ -1,5 +1,7 @@
 
 // Additional private colleges to enhance the database
+import { southIndiaPrivateColleges } from './southIndiaPrivateColleges';
+
 export const privateColleges = [
   // Delhi Private Colleges
   {
@@ -317,7 +319,10 @@ export const privateColleges = [
     founded: 2015,
     brochure: "https://flame.edu.in/brochure.pdf",
     status: "approved"
-  }
+  },
+
+  // Include South India Private Colleges
+  ...southIndiaPrivateColleges
 ];
 
 export const getAllPrivateStates = () => {
