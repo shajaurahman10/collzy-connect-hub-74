@@ -62,39 +62,43 @@ const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
   };
 
   const checkStudentProfile = () => {
-    const profile = JSON.parse(localStorage.getItem('studentProfile') || '{}');
-    return profile.firstName && profile.email && profile.phone && profile.state && profile.marks;
+    // Check if user has submitted Google Form - we'll use a flag in localStorage
+    const hasProfile = localStorage.getItem('collzy-profile-created');
+    return hasProfile === 'true';
   };
 
   const handleApplyClick = () => {
     if (!checkStudentProfile()) {
       toast({
-        title: "Profile Incomplete",
-        description: "Please complete your profile before applying.",
+        title: "Create Profile First",
+        description: "Please create your profile to apply to colleges.",
         variant: "destructive",
       });
-      navigate('/profile');
+      // Redirect to Google Form
+      localStorage.setItem('collzy-return-url', window.location.href);
+      window.open('https://forms.gle/Cp2G5Lm5sNFe8eJu6', '_blank');
       return;
     }
 
-    const profile = JSON.parse(localStorage.getItem('studentProfile') || '{}');
+    // Get profile data from localStorage (we'll assume it's stored after form submission)
+    const profileData = JSON.parse(localStorage.getItem('collzy-profile-data') || '{}');
     const subject = `Admission Enquiry via Collzy`;
     const body = `Dear ${college.name} Admissions Team,
 
 I'm interested in applying to your college. I came across your profile on Collzy and would like to know more about the admission process, eligibility, and important dates.
 
 My profile details:
-- Name: ${profile.firstName} ${profile.lastName || ''}
-- Email: ${profile.email}
-- Phone: ${profile.phone}
-- State: ${profile.state}
-- 12th Grade Marks: ${profile.marks || 'Not specified'}
+- Name: ${profileData.name || 'Not specified'}
+- Email: ${profileData.email || 'Not specified'}
+- Phone: ${profileData.phone || 'Not specified'}
+- State: ${profileData.state || 'Not specified'}
+- 12th Grade Marks: ${profileData.marks || 'Not specified'}
 
 Kindly refer to my submitted details via this form: https://forms.gle/Cp2G5Lm5sNFe8eJu6
 
 Thank you!
 Regards,
-${profile.firstName} ${profile.lastName || ''}
+${profileData.name || 'Student'}
 Collzy.com`;
 
     if (college.email) {
@@ -102,7 +106,7 @@ Collzy.com`;
       window.open(mailtoLink, '_self');
       
       // Send to Google Sheets
-      submitToGoogleSheets(profile, college);
+      submitToGoogleSheets(profileData, college);
       
       toast({
         title: "🎉 Application Sent Successfully!",
@@ -117,9 +121,9 @@ Collzy.com`;
   const submitToGoogleSheets = async (profile: any, college: any) => {
     try {
       const formData = new FormData();
-      formData.append('entry.123456789', profile.firstName + ' ' + (profile.lastName || ''));
-      formData.append('entry.987654321', profile.email);
-      formData.append('entry.456789123', profile.phone);
+      formData.append('entry.123456789', profile.name || '');
+      formData.append('entry.987654321', profile.email || '');
+      formData.append('entry.456789123', profile.phone || '');
       formData.append('entry.789123456', college.name);
       formData.append('entry.321654987', college.state);
       

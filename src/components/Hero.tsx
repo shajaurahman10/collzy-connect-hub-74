@@ -12,6 +12,13 @@ const Hero = () => {
     { icon: Star, label: 'Rating', value: '4.9/5' },
   ];
 
+  const handleCreateProfile = () => {
+    // Store current URL for return redirect
+    localStorage.setItem('collzy-return-url', window.location.origin);
+    // Redirect to Google Form
+    window.open('https://forms.gle/Cp2G5Lm5sNFe8eJu6', '_blank');
+  };
+
   return (
     <>
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800">
@@ -37,22 +44,24 @@ const Hero = () => {
 
               {/* Create Profile Button - Enhanced design */}
               <div className="mb-6 animate-fade-in">
-                <Button asChild size="lg" className="text-lg px-8 py-4 bg-blue-900 text-white hover:bg-blue-800 border-2 border-white shadow-lg font-semibold">
-                  <Link to="/profile">
-                    Create Profile
-                  </Link>
+                <Button 
+                  onClick={handleCreateProfile}
+                  size="lg" 
+                  className="text-lg px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white border-2 border-white shadow-lg font-semibold hover:scale-105 transition-all duration-300"
+                >
+                  🎓 Create Profile - Apply to Colleges
                 </Button>
               </div>
               
               <p className="text-xl text-blue-100 mb-8 max-w-2xl animate-fade-in">
-                Connect directly with college admissions offices via WhatsApp. 
+                Connect directly with college admissions offices via email. 
                 Streamlined applications, instant responses, and personalized guidance for your academic journey.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 mb-12 animate-fade-in">
                 <Button asChild size="lg" className="text-lg px-8 py-4 bg-white text-blue-600 hover:bg-gray-100">
                   <Link to="/colleges">
-                    Explore Colleges
+                    Explore 300+ Colleges
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>

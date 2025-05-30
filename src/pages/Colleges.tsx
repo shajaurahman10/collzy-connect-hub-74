@@ -12,33 +12,66 @@ import { majorCityColleges } from '@/data/majorCityColleges';
 import { googleSheetsIntegration } from '@/utils/googleSheetsIntegration';
 import { comprehensiveCollegeData, getAllComprehensiveStates } from '@/data/comprehensiveCollegeData';
 import { privateColleges } from '@/data/privateColleges';
+import { massiveCollegeData, getAllMassiveStates } from '@/data/massiveCollegeData';
 
 const Colleges = () => {
   const [colleges, setColleges] = useState([]);
+  const [displayedColleges, setDisplayedColleges] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [selectedState, setSelectedState] = useState('all');
   const [sortBy, setSortBy] = useState('name');
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [collegesPerPage] = useState(50);
   const { toast } = useToast();
 
   useEffect(() => {
     loadColleges();
   }, []);
 
+  useEffect(() => {
+    // Check if user returned from Google Form
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('profile') === 'created') {
+      localStorage.setItem('collzy-profile-created', 'true');
+      toast({
+        title: "🎉 Profile Created Successfully!",
+        description: "Now you can apply to colleges. Check your email frequently to connect with colleges!",
+        duration: 6000,
+      });
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [toast]);
+
   const loadColleges = async () => {
     try {
       setLoading(true);
       // Try to get colleges from Google Sheets first
       const sheetsColleges = await googleSheetsIntegration.getColleges();
-      // Combine with all local college data including comprehensive data and private colleges
-      const allColleges = [...indianColleges, ...majorCityColleges, ...comprehensiveCollegeData, ...privateColleges, ...sheetsColleges];
+      // Combine with all local college data including massive data
+      const allColleges = [
+        ...indianColleges, 
+        ...majorCityColleges, 
+        ...comprehensiveCollegeData, 
+        ...privateColleges, 
+        ...massiveCollegeData,
+        ...sheetsColleges
+      ];
       setColleges(allColleges);
     } catch (error) {
       console.error('Error loading colleges:', error);
-      // Fallback to local data including comprehensive data and private colleges
-      setColleges([...indianColleges, ...majorCityColleges, ...comprehensiveCollegeData, ...privateColleges]);
+      // Fallback to local data including massive data
+      setColleges([
+        ...indianColleges, 
+        ...majorCityColleges, 
+        ...comprehensiveCollegeData, 
+        ...privateColleges, 
+        ...massiveCollegeData
+      ]);
       toast({
         title: "Loading Notice",
         description: "Using local college data. Connect Google Sheets for live updates.",
@@ -72,6 +105,21 @@ const Colleges = () => {
           return 0;
       }
     });
+
+  // Implement pagination
+  useEffect(() => {
+    const startIndex = 0;
+    const endIndex = currentPage * collegesPerPage;
+    setDisplayedColleges(filteredAndSortedColleges.slice(startIndex, endIndex));
+  }, [filteredAndSortedColleges, currentPage, collegesPerPage]);
+
+  const loadMore = () => {
+    setLoadingMore(true);
+    setTimeout(() => {
+      setCurrentPage(prev => prev + 1);
+      setLoadingMore(false);
+    }, 500);
+  };
 
   const handleApplyToCollege = (college) => {
     const message = `🎓 Hello! I found your college through Collzy platform and I'm very interested in applying to ${college.name}.
@@ -140,7 +188,7 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
     setSortBy('name');
   };
 
-  const states = getAllComprehensiveStates();
+  const states = getAllMassiveStates();
 
   if (loading) {
     return (
@@ -150,7 +198,7 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-blue-600 font-medium">Loading colleges...</p>
+              <p className="text-blue-600 font-medium">Loading 300+ colleges...</p>
             </div>
           </div>
         </div>
@@ -173,7 +221,7 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
               Discover Your Perfect College
             </h1>
             <p className="text-lg sm:text-xl text-blue-700 max-w-3xl mx-auto px-4 leading-relaxed">
-              Explore 500+ institutions across India. Find your ideal academic match with our comprehensive search and filtering system.
+              Explore 300+ institutions across India. Find your ideal academic match with our comprehensive search and filtering system.
             </p>
           </div>
 
@@ -225,7 +273,7 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
               <CardContent>
                 <Building2 className="h-16 sm:h-20 w-16 sm:w-20 text-orange-400 mx-auto mb-6" />
                 <h3 className="text-xl sm:text-2xl font-semibold text-orange-700 mb-3">
-                  {selectedState} - Coming Soon!
+                  {selectedState} - Still Not Partnered with Collzy!
                 </h3>
                 <p className="text-orange-600 mb-8 px-4 max-w-md mx-auto">
                   We haven't partnered with colleges in {selectedState} yet, but we're working on it! 
@@ -242,22 +290,45 @@ Note: This inquiry was sent through Collzy - India's leading college discovery p
           )}
 
           {/* Colleges Grid */}
-          {filteredAndSortedColleges.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
-              {filteredAndSortedColleges.map((college, index) => (
-                <div
-                  key={college.id}
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  <CollegeCard
-                    college={college}
-                    onApply={() => handleApplyToCollege(college)}
-                    onFavorite={handleFavoriteCollege}
-                  />
+          {displayedColleges.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+                {displayedColleges.map((college, index) => (
+                  <div
+                    key={college.id}
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                  >
+                    <CollegeCard
+                      college={college}
+                      onApply={() => handleApplyToCollege(college)}
+                      onFavorite={handleFavoriteCollege}
+                    />
+                  </div>
+                ))}
+              </div>
+              
+              {/* Load More Button */}
+              {displayedColleges.length < filteredAndSortedColleges.length && (
+                <div className="text-center mt-8">
+                  <Button 
+                    onClick={loadMore}
+                    disabled={loadingMore}
+                    size="lg"
+                    className="bg-blue-600 hover:bg-blue-700 hover:scale-105 transition-all duration-200"
+                  >
+                    {loadingMore ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Loading More...
+                      </>
+                    ) : (
+                      `Load More (${filteredAndSortedColleges.length - displayedColleges.length} remaining)`
+                    )}
+                  </Button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           ) : !showPartnershipMessage && (
             <Card className="text-center py-16 sm:py-20 border-blue-200 bg-white/80 backdrop-blur-sm">
               <CardContent>

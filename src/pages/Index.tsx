@@ -16,6 +16,7 @@ import { indianColleges, getAllStates } from '@/data/indianColleges';
 import { majorCityColleges } from '@/data/majorCityColleges';
 import { comprehensiveCollegeData, getAllComprehensiveStates } from '@/data/comprehensiveCollegeData';
 import { privateColleges } from '@/data/privateColleges';
+import { massiveCollegeData, getAllMassiveStates } from '@/data/massiveCollegeData';
 
 const Index = () => {
   const [colleges, setColleges] = useState([]);
@@ -26,18 +27,47 @@ const Index = () => {
 
   useEffect(() => {
     loadColleges();
+    checkForProfileReturn();
   }, []);
+
+  const checkForProfileReturn = () => {
+    // Check if user returned from Google Form
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('profile') === 'created') {
+      localStorage.setItem('collzy-profile-created', 'true');
+      toast({
+        title: "🎉 Profile Created Successfully!",
+        description: "Now you can apply to colleges. Check your email frequently to connect with colleges!",
+        duration: 6000,
+      });
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  };
 
   const loadColleges = async () => {
     try {
       const approvedColleges = await googleSheetsService.getColleges('approved');
-      // Combine all college data sources including private colleges
-      const allColleges = [...indianColleges, ...majorCityColleges, ...comprehensiveCollegeData, ...privateColleges, ...approvedColleges];
+      // Combine all college data sources including massive college data
+      const allColleges = [
+        ...indianColleges, 
+        ...majorCityColleges, 
+        ...comprehensiveCollegeData, 
+        ...privateColleges, 
+        ...massiveCollegeData,
+        ...approvedColleges
+      ];
       setColleges(allColleges);
     } catch (error) {
       console.error('Error loading colleges:', error);
-      // Fallback to combined local data including private colleges
-      setColleges([...indianColleges, ...majorCityColleges, ...comprehensiveCollegeData, ...privateColleges]);
+      // Fallback to combined local data including massive college data
+      setColleges([
+        ...indianColleges, 
+        ...majorCityColleges, 
+        ...comprehensiveCollegeData, 
+        ...privateColleges, 
+        ...massiveCollegeData
+      ]);
     }
   };
 
@@ -83,7 +113,7 @@ A prospective student from Collzy 🌟`;
     });
   };
 
-  const states = getAllComprehensiveStates();
+  const states = getAllMassiveStates();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -95,9 +125,9 @@ A prospective student from Collzy 🌟`;
       <section className="py-12 sm:py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8 sm:mb-12 animate-fade-in">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Discover Indian Colleges</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Discover 300+ Indian Colleges</h2>
             <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-              Explore 500+ colleges and universities across India. Find the perfect match for your academic journey.
+              Explore our comprehensive database of colleges and universities across India. Find the perfect match for your academic journey.
             </p>
           </div>
 
@@ -187,9 +217,9 @@ A prospective student from Collzy 🌟`;
 
           {filteredColleges.length > 50 && (
             <div className="text-center mt-6 sm:mt-8">
-              <p className="text-gray-600 mb-4 text-sm sm:text-base px-4">Showing first 50 results. Use filters to narrow your search.</p>
+              <p className="text-gray-600 mb-4 text-sm sm:text-base px-4">Showing first 50 results out of {filteredColleges.length} colleges. Use filters to narrow your search.</p>
               <Button asChild variant="outline">
-                <Link to="/colleges">View All Colleges</Link>
+                <Link to="/colleges">View All {filteredColleges.length} Colleges</Link>
               </Button>
             </div>
           )}
@@ -227,7 +257,7 @@ A prospective student from Collzy 🌟`;
                 </div>
                 <CardTitle className="text-lg sm:text-xl">Easy Applications</CardTitle>
                 <CardDescription className="text-sm sm:text-base">
-                  Apply to colleges with just one click through our integrated communication system.
+                  Create your profile and apply to colleges with just one click through our integrated system.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -237,9 +267,9 @@ A prospective student from Collzy 🌟`;
                 <div className="w-12 sm:w-16 h-12 sm:h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <GraduationCap className="h-6 sm:h-8 w-6 sm:w-8 text-purple-600" />
                 </div>
-                <CardTitle className="text-lg sm:text-xl">Profile Management</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">300+ Colleges</CardTitle>
                 <CardDescription className="text-sm sm:text-base">
-                  Create and manage your academic profile to showcase your achievements and track applications.
+                  Access our comprehensive database of colleges across India with verified contact information.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -257,15 +287,21 @@ A prospective student from Collzy 🌟`;
             Join thousands of students who have found their perfect college match through Collzy.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" variant="secondary" className="text-base sm:text-lg px-6 sm:px-8 py-3">
-              <Link to="/profile">
-                Create Profile
-                <ArrowRight className="ml-2 h-4 sm:h-5 w-4 sm:w-5" />
-              </Link>
+            <Button 
+              onClick={() => {
+                localStorage.setItem('collzy-return-url', window.location.origin);
+                window.open('https://forms.gle/Cp2G5Lm5sNFe8eJu6', '_blank');
+              }}
+              size="lg" 
+              variant="secondary" 
+              className="text-base sm:text-lg px-6 sm:px-8 py-3"
+            >
+              Create Profile
+              <ArrowRight className="ml-2 h-4 sm:h-5 w-4 sm:w-5" />
             </Button>
             <Button asChild size="lg" variant="outline" className="text-base sm:text-lg px-6 sm:px-8 py-3 bg-transparent border-white text-white hover:bg-white hover:text-blue-600">
               <Link to="/colleges">
-                Explore Colleges
+                Explore 300+ Colleges
               </Link>
             </Button>
           </div>
@@ -289,8 +325,18 @@ A prospective student from Collzy 🌟`;
             <div>
               <h3 className="font-semibold mb-4 text-base sm:text-lg">Platform</h3>
               <ul className="space-y-2 text-gray-400 text-sm sm:text-base">
-                <li><Link to="/colleges" className="hover:text-white transition-colors">Browse Colleges</Link></li>
-                <li><Link to="/profile" className="hover:text-white transition-colors">Create Profile</Link></li>
+                <li><Link to="/colleges" className="hover:text-white transition-colors">Browse 300+ Colleges</Link></li>
+                <li>
+                  <button 
+                    onClick={() => {
+                      localStorage.setItem('collzy-return-url', window.location.origin);
+                      window.open('https://forms.gle/Cp2G5Lm5sNFe8eJu6', '_blank');
+                    }}
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    Create Profile
+                  </button>
+                </li>
               </ul>
             </div>
             <div>
