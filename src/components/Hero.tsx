@@ -2,9 +2,11 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Star, Users, Building2, GraduationCap } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 import Footer from './Footer';
 
 const Hero = () => {
+  const { user } = useAuth();
   const stats = [
     { icon: Building2, label: 'Universities', value: '10,000+' },
     { icon: Users, label: 'Students', value: '500K+' },
@@ -13,10 +15,11 @@ const Hero = () => {
   ];
 
   const handleCreateProfile = () => {
-    // Store current URL for return redirect
-    localStorage.setItem('collzy-return-url', window.location.origin);
-    // Redirect to Google Form
-    window.open('https://forms.gle/Cp2G5Lm5sNFe8eJu6', '_blank');
+    if (user) {
+      window.location.href = '/profile';
+    } else {
+      window.location.href = '/auth';
+    }
   };
 
   return (
@@ -49,7 +52,7 @@ const Hero = () => {
                   size="lg" 
                   className="text-lg px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white border-2 border-white shadow-lg font-semibold hover:scale-105 transition-all duration-300"
                 >
-                  🎓 Create Profile - Apply to Colleges
+                  🎓 {user ? 'View Profile' : 'Create Profile'} - Apply to Colleges
                 </Button>
               </div>
               
@@ -59,9 +62,9 @@ const Hero = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 mb-12 animate-fade-in">
-                <Button asChild size="lg" className="text-lg px-8 py-4 bg-white text-blue-600 hover:bg-gray-100">
+                <Button asChild size="lg" className="text-lg px-8 py-4 bg-white text-blue-600 hover:bg-gray-100 hover:scale-105 transition-all duration-300">
                   <Link to="/colleges">
-                    Explore 300+ Colleges
+                    Explore Colleges
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
