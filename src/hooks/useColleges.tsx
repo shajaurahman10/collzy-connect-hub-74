@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -333,22 +332,6 @@ export const useColleges = () => {
         // Use fallback data
         const convertedColleges = fallbackPrivateColleges.map(convertToCollegeFormat);
         setColleges(convertedColleges);
-      }
-
-      // Also try to fetch from main colleges table if it exists
-      const { data: mainData, error: mainError } = await supabase
-        .from('colleges')
-        .select('*')
-        .eq('status', 'approved')
-        .order('name');
-
-      if (mainData && mainData.length > 0) {
-        // Combine both datasets, avoiding duplicates
-        const existingNames = new Set(colleges.map(c => c.name.toLowerCase()));
-        const uniqueMainColleges = mainData.filter((college: College) => 
-          !existingNames.has(college.name.toLowerCase())
-        );
-        setColleges(prev => [...prev, ...uniqueMainColleges]);
       }
 
     } catch (err: any) {

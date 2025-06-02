@@ -5,14 +5,13 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface Profile {
   id: string;
-  user_id: string;
   full_name: string;
   email: string;
-  phone: string;
-  state: string;
-  marks: string;
-  course_interest: string;
-  created_at: string;
+  phone: string | null;
+  state: string | null;
+  marks: string | null;
+  course_interest: string | null;
+  created_at: string | null;
 }
 
 export const useProfile = () => {
@@ -34,7 +33,7 @@ export const useProfile = () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('id', user?.id)
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;

@@ -12,11 +12,11 @@ import { User, Mail, Phone, MapPin, GraduationCap, BookOpen } from 'lucide-react
 interface ProfileData {
   full_name: string;
   email: string;
-  phone: string;
-  state: string;
-  marks: string;
-  course_interest: string;
-  created_at: string;
+  phone: string | null;
+  state: string | null;
+  marks: string | null;
+  course_interest: string | null;
+  created_at: string | null;
 }
 
 const Profile = () => {
@@ -36,10 +36,10 @@ const Profile = () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('user_id', user?.id)
-        .single();
+        .eq('id', user?.id)
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') throw error;
       
       if (data) {
         setProfile(data);
