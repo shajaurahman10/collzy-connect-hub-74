@@ -124,7 +124,7 @@ const PrivateColleges = () => {
             Private Colleges in India
           </h1>
           <p className="text-lg sm:text-xl text-blue-700 max-w-3xl mx-auto px-4 leading-relaxed mb-6">
-            Discover verified UGC and NAAC approved private colleges across India. Find the perfect institution for your academic journey.
+            Discover {privateColleges.length}+ verified UGC and NAAC approved private colleges across India. Find the perfect institution for your academic journey.
           </p>
           
           {/* New Action Buttons */}

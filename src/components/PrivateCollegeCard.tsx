@@ -8,22 +8,23 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 
-interface PrivateCollege {
-  id: number;
+interface College {
+  id: string;
   name: string;
   city: string;
   state: string;
-  website: string;
-  admission_email: string;
-  contact_number: string;
-  affiliation: string;
-  naac_grade: string;
+  website?: string;
+  admission_email?: string;
+  phone?: string;
+  affiliation?: string;
+  naac_grade?: string;
+  type: string;
   created_at: string;
 }
 
 interface PrivateCollegeCardProps {
-  college: PrivateCollege;
-  onFavorite?: (collegeId: number, isFavorited: boolean) => void;
+  college: College;
+  onFavorite?: (collegeId: string, isFavorited: boolean) => void;
 }
 
 const PrivateCollegeCard = ({ college, onFavorite }: PrivateCollegeCardProps) => {
@@ -106,7 +107,8 @@ Phone: ${profile.phone}
 
 ---
 This inquiry was sent through Collzy - India's leading college discovery platform.
-Visit: www.collzy.com`;
+Contact us: collzy.info@gmail.com | WhatsApp: +91 8129913205
+Location: Kasargod, Kerala`;
 
     // Open email client with pre-filled message
     const mailtoUrl = `mailto:${college.admission_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -132,8 +134,8 @@ Visit: www.collzy.com`;
   };
 
   const handleCall = () => {
-    if (college.contact_number) {
-      window.open(`tel:${college.contact_number}`, '_self');
+    if (college.phone) {
+      window.open(`tel:${college.phone}`, '_self');
     }
   };
 
@@ -141,7 +143,8 @@ Visit: www.collzy.com`;
     window.open(`mailto:${college.admission_email}`, '_self');
   };
 
-  const getGradeColor = (grade: string) => {
+  const getGradeColor = (grade?: string) => {
+    if (!grade) return 'bg-gray-100 text-gray-800';
     switch (grade) {
       case 'A++': return 'bg-green-100 text-green-800';
       case 'A+': return 'bg-blue-100 text-blue-800';
@@ -181,24 +184,28 @@ Visit: www.collzy.com`;
           <div className="flex items-center space-x-2">
             <Award className="h-4 w-4 text-yellow-500" />
             <Badge className={getGradeColor(college.naac_grade)}>
-              NAAC {college.naac_grade}
+              NAAC {college.naac_grade || 'Not Rated'}
             </Badge>
           </div>
-          <Badge variant="secondary">
-            {college.affiliation}
-          </Badge>
+          {college.affiliation && (
+            <Badge variant="secondary">
+              {college.affiliation}
+            </Badge>
+          )}
         </div>
 
         {/* Contact Info */}
         <div className="mb-6 space-y-2">
-          <div className="flex items-center text-sm text-gray-600">
-            <Mail className="h-4 w-4 mr-2" />
-            <span className="truncate">{college.admission_email}</span>
-          </div>
-          {college.contact_number && (
+          {college.admission_email && (
+            <div className="flex items-center text-sm text-gray-600">
+              <Mail className="h-4 w-4 mr-2" />
+              <span className="truncate">{college.admission_email}</span>
+            </div>
+          )}
+          {college.phone && (
             <div className="flex items-center text-sm text-gray-600">
               <Phone className="h-4 w-4 mr-2" />
-              <span>{college.contact_number}</span>
+              <span>{college.phone}</span>
             </div>
           )}
         </div>
@@ -226,7 +233,7 @@ Visit: www.collzy.com`;
           <Button 
             variant="outline" 
             onClick={handleCall}
-            disabled={!college.contact_number}
+            disabled={!college.phone}
             size="sm"
             className="hover:scale-105 transition-all duration-200"
           >
@@ -238,6 +245,7 @@ Visit: www.collzy.com`;
             onClick={handleEmail}
             size="sm"
             className="hover:scale-105 transition-all duration-200"
+            disabled={!college.admission_email}
           >
             <ExternalLink className="h-4 w-4 mr-1" />
             Email

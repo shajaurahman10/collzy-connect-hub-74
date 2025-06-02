@@ -7,8 +7,9 @@ import AdvancedCollegeSearch from '@/components/AdvancedCollegeSearch';
 import EntranceExamCard from '@/components/EntranceExamCard';
 import { useColleges } from '@/hooks/useColleges';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GraduationCap, BookOpen, Search, TrendingUp } from 'lucide-react';
+import { GraduationCap, BookOpen, Search, TrendingUp, Users, Award } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent } from '@/components/ui/card';
 
 const Colleges = () => {
   const { colleges, entranceExams, loading, searchColleges } = useColleges();
@@ -84,19 +85,44 @@ const Colleges = () => {
             Discover Your Dream College
           </h1>
           <p className="text-lg sm:text-xl text-blue-700 max-w-3xl mx-auto px-4 leading-relaxed">
-            Explore thousands of colleges across India. Find the perfect match for your career aspirations with our comprehensive search and comparison tools.
+            Explore {colleges.length}+ verified colleges across India. Find the perfect match for your career aspirations with our comprehensive search and comparison tools.
           </p>
         </div>
 
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+            <CardContent className="p-6 text-center">
+              <GraduationCap className="h-12 w-12 text-blue-600 mx-auto mb-3" />
+              <h3 className="text-2xl font-bold text-blue-800">{colleges.length}+</h3>
+              <p className="text-blue-600">Verified Colleges</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+            <CardContent className="p-6 text-center">
+              <BookOpen className="h-12 w-12 text-green-600 mx-auto mb-3" />
+              <h3 className="text-2xl font-bold text-green-800">{entranceExams.length}+</h3>
+              <p className="text-green-600">Entrance Exams</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+            <CardContent className="p-6 text-center">
+              <Users className="h-12 w-12 text-purple-600 mx-auto mb-3" />
+              <h3 className="text-2xl font-bold text-purple-800">10,000+</h3>
+              <p className="text-purple-600">Students Helped</p>
+            </CardContent>
+          </Card>
+        </div>
+
         <Tabs defaultValue="colleges" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8 bg-white/50 backdrop-blur">
-            <TabsTrigger value="colleges" className="flex items-center space-x-2">
-              <GraduationCap className="h-4 w-4" />
-              <span>Colleges</span>
+          <TabsList className="grid w-full grid-cols-2 mb-8 bg-white/50 backdrop-blur h-14">
+            <TabsTrigger value="colleges" className="flex items-center space-x-3 text-lg font-medium">
+              <GraduationCap className="h-5 w-5" />
+              <span>Colleges ({colleges.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="exams" className="flex items-center space-x-2">
-              <BookOpen className="h-4 w-4" />
-              <span>Entrance Exams</span>
+            <TabsTrigger value="exams" className="flex items-center space-x-3 text-lg font-medium">
+              <BookOpen className="h-5 w-5" />
+              <span>Entrance Exams ({entranceExams.length})</span>
             </TabsTrigger>
           </TabsList>
 
@@ -143,8 +169,23 @@ const Colleges = () => {
 
           <TabsContent value="exams" className="space-y-6">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Entrance Exams</h2>
-              <p className="text-gray-600">Apply for entrance exams with just one click</p>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                🎯 Entrance Exams - Apply with One Click!
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Apply for {entranceExams.length}+ entrance exams directly through our platform. 
+                Get instant access to official application portals.
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-8">
+              <div className="flex items-center justify-center space-x-4">
+                <Award className="h-8 w-8 text-blue-600" />
+                <div className="text-center">
+                  <h3 className="text-xl font-bold text-blue-800">One-Click Application</h3>
+                  <p className="text-blue-600">Apply to multiple exams seamlessly</p>
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -152,6 +193,14 @@ const Colleges = () => {
                 <EntranceExamCard key={exam.id} exam={exam} />
               ))}
             </div>
+
+            {entranceExams.length === 0 && (
+              <div className="text-center py-12">
+                <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">No entrance exams available</h3>
+                <p className="text-gray-500">Check back soon for the latest entrance exam opportunities</p>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>
