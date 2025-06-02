@@ -34,13 +34,16 @@ const Profile = () => {
   const fetchProfile = async () => {
     try {
       const { data, error } = await supabase
-        .from('profiles' as any)
+        .from('profiles')
         .select('*')
         .eq('user_id', user?.id)
         .single();
 
       if (error) throw error;
-      setProfile(data);
+      
+      if (data) {
+        setProfile(data);
+      }
     } catch (error: any) {
       toast({
         title: "Error",

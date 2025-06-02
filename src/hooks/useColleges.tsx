@@ -320,7 +320,7 @@ export const useColleges = () => {
     try {
       // Try to fetch from private_colleges table
       const { data: privateData, error: privateError } = await supabase
-        .from('private_colleges' as any)
+        .from('private_colleges')
         .select('*')
         .order('name');
 
@@ -337,7 +337,7 @@ export const useColleges = () => {
 
       // Also try to fetch from main colleges table if it exists
       const { data: mainData, error: mainError } = await supabase
-        .from('colleges' as any)
+        .from('colleges')
         .select('*')
         .eq('status', 'approved')
         .order('name');

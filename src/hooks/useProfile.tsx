@@ -32,14 +32,16 @@ export const useProfile = () => {
   const fetchProfile = async () => {
     try {
       const { data, error } = await supabase
-        .from('profiles' as any)
+        .from('profiles')
         .select('*')
         .eq('user_id', user?.id)
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;
       
-      setProfile(data);
+      if (data) {
+        setProfile(data);
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
