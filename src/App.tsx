@@ -20,6 +20,8 @@ import SubmitCollege from "./pages/SubmitCollege";
 import Admin from "./pages/Admin";
 import Colleges from "./pages/Colleges";
 import PrivateColleges from "./pages/PrivateColleges";
+import Rankings from "./pages/Rankings";
+import Tracker from "./pages/Tracker";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -60,6 +62,8 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/colleges" element={<Colleges />} />
             <Route path="/private-colleges" element={<PrivateColleges />} />
+            <Route path="/rankings" element={<Rankings />} />
+            <Route path="/tracker" element={<Tracker />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

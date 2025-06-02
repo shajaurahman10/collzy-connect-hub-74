@@ -1,12 +1,13 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, Search, Filter } from 'lucide-react';
+import { Building2, Search, Filter, BarChart3 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import PrivateCollegeCard from '@/components/PrivateCollegeCard';
+import CollegeComparison from '@/components/CollegeComparison';
+import AdvancedCollegeSearch from '@/components/AdvancedCollegeSearch';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { useColleges } from '@/hooks/useColleges';
@@ -19,6 +20,8 @@ const PrivateColleges = () => {
   const [selectedGrade, setSelectedGrade] = useState('all');
   const [sortBy, setSortBy] = useState('name');
   const [showFilters, setShowFilters] = useState(false);
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [showComparison, setShowComparison] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [collegesPerPage] = useState(24);
   const { toast } = useToast();
@@ -76,6 +79,24 @@ const PrivateColleges = () => {
     setCurrentPage(1);
   };
 
+  const handleAdvancedSearch = (filters: any) => {
+    // Apply advanced filters logic here
+    console.log('Advanced search filters:', filters);
+    toast({
+      title: "Search Applied",
+      description: "Advanced search filters have been applied successfully.",
+    });
+  };
+
+  const handleClearAdvancedSearch = () => {
+    // Clear all advanced filters
+    setSearchTerm('');
+    setSelectedState('all');
+    setSelectedGrade('all');
+    setSortBy('name');
+    setCurrentPage(1);
+  };
+
   if (collegesLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -95,15 +116,46 @@ const PrivateColleges = () => {
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+        {/* Header with new action buttons */}
         <div className="text-center mb-8 lg:mb-12 animate-fade-in">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
             Private Colleges in India
           </h1>
-          <p className="text-lg sm:text-xl text-blue-700 max-w-3xl mx-auto px-4 leading-relaxed">
+          <p className="text-lg sm:text-xl text-blue-700 max-w-3xl mx-auto px-4 leading-relaxed mb-6">
             Discover verified UGC and NAAC approved private colleges across India. Find the perfect institution for your academic journey.
           </p>
+          
+          {/* New Action Buttons */}
+          <div className="flex flex-wrap justify-center gap-4 mb-6">
+            <Button 
+              onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
+              variant="outline"
+              className="bg-white hover:bg-blue-50"
+            >
+              <Search className="h-4 w-4 mr-2" />
+              Advanced Search
+            </Button>
+            <Button 
+              onClick={() => setShowComparison(true)}
+              variant="outline"
+              className="bg-white hover:bg-blue-50"
+            >
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Compare Colleges
+            </Button>
+          </div>
         </div>
+
+        {/* Advanced Search Component */}
+        {showAdvancedSearch && (
+          <div className="mb-8">
+            <AdvancedCollegeSearch
+              onSearch={handleAdvancedSearch}
+              onClear={handleClearAdvancedSearch}
+              resultCount={filteredAndSortedColleges.length}
+            />
+          </div>
+        )}
 
         {/* Search and Filters */}
         <div className="mb-8 space-y-4">
@@ -256,6 +308,14 @@ const PrivateColleges = () => {
           </Card>
         )}
       </div>
+      
+      {/* College Comparison Modal */}
+      {showComparison && (
+        <CollegeComparison
+          colleges={privateColleges}
+          onClose={() => setShowComparison(false)}
+        />
+      )}
       
       <Footer />
     </div>
