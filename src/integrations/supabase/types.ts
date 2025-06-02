@@ -9,7 +9,78 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      private_colleges: {
+        Row: {
+          admission_email: string | null
+          affiliation: string | null
+          city: string | null
+          contact_number: string | null
+          created_at: string
+          id: number
+          naac_grade: string | null
+          name: string | null
+          state: string | null
+          website: string | null
+        }
+        Insert: {
+          admission_email?: string | null
+          affiliation?: string | null
+          city?: string | null
+          contact_number?: string | null
+          created_at?: string
+          id?: number
+          naac_grade?: string | null
+          name?: string | null
+          state?: string | null
+          website?: string | null
+        }
+        Update: {
+          admission_email?: string | null
+          affiliation?: string | null
+          city?: string | null
+          contact_number?: string | null
+          created_at?: string
+          id?: number
+          naac_grade?: string | null
+          name?: string | null
+          state?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          course_interest: string | null
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          marks: string | null
+          phone: string | null
+          state: string | null
+        }
+        Insert: {
+          course_interest?: string | null
+          created_at?: string | null
+          email: string
+          full_name: string
+          id: string
+          marks?: string | null
+          phone?: string | null
+          state?: string | null
+        }
+        Update: {
+          course_interest?: string | null
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          marks?: string | null
+          phone?: string | null
+          state?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -32,7 +32,7 @@ export const useProfile = () => {
   const fetchProfile = async () => {
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('profiles' as any)
         .select('*')
         .eq('user_id', user?.id)
         .maybeSingle();

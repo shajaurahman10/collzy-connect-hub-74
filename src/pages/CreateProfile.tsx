@@ -60,7 +60,7 @@ const CreateProfile = () => {
     setLoading(true);
     try {
       const { error } = await supabase
-        .from('profiles')
+        .from('profiles' as any)
         .insert([
           {
             user_id: user.id,
