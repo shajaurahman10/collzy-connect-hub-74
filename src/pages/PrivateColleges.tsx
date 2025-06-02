@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useColleges } from '@/hooks/useColleges';
 
 const PrivateColleges = () => {
-  const { privateColleges, loading: collegesLoading } = useColleges();
+  const { colleges, loading: collegesLoading } = useColleges();
   const [displayedColleges, setDisplayedColleges] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedState, setSelectedState] = useState('all');
@@ -26,9 +27,10 @@ const PrivateColleges = () => {
   const [collegesPerPage] = useState(24);
   const { toast } = useToast();
 
-  // Get unique states and grades from colleges
+  // Filter only private colleges and get unique states and grades
+  const privateColleges = colleges.filter(college => college.type === 'Private');
   const states = [...new Set(privateColleges.map(college => college.state))].sort();
-  const grades = [...new Set(privateColleges.map(college => college.naac_grade))].sort();
+  const grades = [...new Set(privateColleges.map(college => college.naac_grade).filter(Boolean))].sort();
 
   const filteredAndSortedColleges = privateColleges
     .filter(college => {
@@ -47,7 +49,7 @@ const PrivateColleges = () => {
           return a.state.localeCompare(b.state);
         case 'grade':
           const gradeOrder = { 'A++': 6, 'A+': 5, 'A': 4, 'B++': 3, 'B+': 2, 'B': 1 };
-          return (gradeOrder[b.naac_grade] || 0) - (gradeOrder[a.naac_grade] || 0);
+          return (gradeOrder[b.naac_grade as keyof typeof gradeOrder] || 0) - (gradeOrder[a.naac_grade as keyof typeof gradeOrder] || 0);
         default:
           return 0;
       }
@@ -64,7 +66,7 @@ const PrivateColleges = () => {
     setCurrentPage(prev => prev + 1);
   };
 
-  const handleFavoriteCollege = (collegeId, isFavorited) => {
+  const handleFavoriteCollege = (collegeId: string, isFavorited: boolean) => {
     toast({
       title: isFavorited ? "Added to Favorites" : "Removed from Favorites",
       description: isFavorited ? "College added to your favorites list" : "College removed from your favorites list",
@@ -151,8 +153,7 @@ const PrivateColleges = () => {
           <div className="mb-8">
             <AdvancedCollegeSearch
               onSearch={handleAdvancedSearch}
-              onClear={handleClearAdvancedSearch}
-              resultCount={filteredAndSortedColleges.length}
+              onReset={handleClearAdvancedSearch}
             />
           </div>
         )}
