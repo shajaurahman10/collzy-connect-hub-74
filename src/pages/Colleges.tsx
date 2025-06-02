@@ -1,81 +1,66 @@
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Building2 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
-import ImprovedCollegeCard from '@/components/ImprovedCollegeCard';
-import SearchFilters from '@/components/SearchFilters';
 import Footer from '@/components/Footer';
-import { useToast } from '@/hooks/use-toast';
+import ImprovedCollegeCard from '@/components/ImprovedCollegeCard';
+import AdvancedCollegeSearch from '@/components/AdvancedCollegeSearch';
+import EntranceExamCard from '@/components/EntranceExamCard';
 import { useColleges } from '@/hooks/useColleges';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { GraduationCap, BookOpen, Search, TrendingUp } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const Colleges = () => {
-  const { colleges: allColleges, loading: collegesLoading } = useColleges();
-  const [displayedColleges, setDisplayedColleges] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('all');
-  const [selectedState, setSelectedState] = useState('all');
-  const [sortBy, setSortBy] = useState('name');
-  const [showFilters, setShowFilters] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [collegesPerPage] = useState(50);
+  const { colleges, entranceExams, loading, searchColleges } = useColleges();
+  const [filteredColleges, setFilteredColleges] = useState(colleges);
+  const [searchLoading, setSearchLoading] = useState(false);
   const { toast } = useToast();
 
-  // Get unique states from colleges
-  const states = [...new Set(allColleges.map(college => college.state))].sort();
-
-  const filteredAndSortedColleges = allColleges
-    .filter(college => {
-      const matchesSearch = college.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           college.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           college.state.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesFilter = filterType === 'all' || college.type.toLowerCase() === filterType.toLowerCase();
-      const matchesState = selectedState === 'all' || college.state === selectedState;
-      return matchesSearch && matchesFilter && matchesState;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'rating':
-          return (b.rating || 0) - (a.rating || 0);
-        case 'students':
-          return (b.students || 0) - (a.students || 0);
-        case 'founded':
-          return (b.founded || 0) - (a.founded || 0);
-        default:
-          return 0;
-      }
-    });
-
-  // Implement pagination
   useEffect(() => {
-    const startIndex = 0;
-    const endIndex = currentPage * collegesPerPage;
-    setDisplayedColleges(filteredAndSortedColleges.slice(startIndex, endIndex));
-  }, [filteredAndSortedColleges, currentPage, collegesPerPage]);
+    setFilteredColleges(colleges);
+  }, [colleges]);
 
-  const loadMore = () => {
-    setCurrentPage(prev => prev + 1);
+  const handleSearch = async (filters: any) => {
+    setSearchLoading(true);
+    try {
+      const results = await searchColleges(filters);
+      setFilteredColleges(results);
+      toast({
+        title: "Search completed",
+        description: `Found ${results.length} colleges matching your criteria`,
+      });
+    } catch (error) {
+      toast({
+        title: "Search failed",
+        description: "Please try again with different filters",
+        variant: "destructive",
+      });
+    } finally {
+      setSearchLoading(false);
+    }
   };
 
-  const handleFavoriteCollege = (collegeId, isFavorited) => {
+  const handleReset = () => {
+    setFilteredColleges(colleges);
+  };
+
+  const handleApply = (collegeId: string) => {
     toast({
-      title: isFavorited ? "Added to Favorites" : "Removed from Favorites",
-      description: isFavorited ? "College added to your favorites list" : "College removed from your favorites list",
+      title: "Application Started",
+      description: "Redirecting to application portal...",
     });
+    // Here you would typically redirect to the application process
   };
 
-  const handleClearFilters = () => {
-    setSearchTerm('');
-    setFilterType('all');
-    setSelectedState('all');
-    setSortBy('name');
-    setCurrentPage(1);
+  const handleCompare = (college: any) => {
+    toast({
+      title: "Added to Comparison",
+      description: `${college.name} has been added to your comparison list`,
+    });
+    // Here you would add to comparison state
   };
 
-  if (collegesLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <Navigation />
@@ -94,106 +79,81 @@ const Colleges = () => {
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="text-center mb-8 lg:mb-12 animate-fade-in">
+        <div className="text-center mb-8">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-            Discover Your Perfect College
+            Discover Your Dream College
           </h1>
           <p className="text-lg sm:text-xl text-blue-700 max-w-3xl mx-auto px-4 leading-relaxed">
-            Explore hundreds of institutions across India. Find your ideal academic match with our comprehensive search and filtering system.
+            Explore thousands of colleges across India. Find the perfect match for your career aspirations with our comprehensive search and comparison tools.
           </p>
         </div>
 
-        {/* Search and Filters */}
-        <SearchFilters
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          filterType={filterType}
-          onFilterTypeChange={setFilterType}
-          selectedState={selectedState}
-          onStateChange={setSelectedState}
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-          states={states}
-          showFilters={showFilters}
-          onToggleFilters={() => setShowFilters(!showFilters)}
-          onClearFilters={handleClearFilters}
-          colleges={allColleges}
-        />
+        <Tabs defaultValue="colleges" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-8 bg-white/50 backdrop-blur">
+            <TabsTrigger value="colleges" className="flex items-center space-x-2">
+              <GraduationCap className="h-4 w-4" />
+              <span>Colleges</span>
+            </TabsTrigger>
+            <TabsTrigger value="exams" className="flex items-center space-x-2">
+              <BookOpen className="h-4 w-4" />
+              <span>Entrance Exams</span>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Results Summary */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-          <div>
-            <p className="text-blue-700 text-base sm:text-lg font-medium">
-              Found <span className="font-bold text-blue-800">{filteredAndSortedColleges.length}</span> colleges
-              {searchTerm && (
-                <span> matching "<span className="font-semibold text-blue-900">{searchTerm}</span>"</span>
-              )}
-            </p>
-            {selectedState !== 'all' && (
-              <p className="text-sm text-blue-600 mt-1">in {selectedState}</p>
-            )}
-          </div>
-          
-          {(searchTerm || filterType !== 'all' || selectedState !== 'all') && (
-            <Button 
-              variant="outline" 
-              onClick={handleClearFilters}
-              className="border-blue-200 text-blue-600 hover:bg-blue-50 hover:scale-105 transition-all duration-200"
-            >
-              Clear All Filters
-            </Button>
-          )}
-        </div>
-
-        {/* Colleges Grid */}
-        {displayedColleges.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
-              {displayedColleges.map((college, index) => (
-                <div
-                  key={college.id}
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  <ImprovedCollegeCard
-                    college={college}
-                    onFavorite={handleFavoriteCollege}
-                  />
-                </div>
-              ))}
-            </div>
+          <TabsContent value="colleges" className="space-y-6">
+            <AdvancedCollegeSearch onSearch={handleSearch} onReset={handleReset} />
             
-            {/* Load More Button */}
-            {displayedColleges.length < filteredAndSortedColleges.length && (
-              <div className="text-center mt-8">
-                <Button 
-                  onClick={loadMore}
-                  size="lg"
-                  className="bg-blue-600 hover:bg-blue-700 hover:scale-105 transition-all duration-200"
-                >
-                  Load More ({filteredAndSortedColleges.length - displayedColleges.length} remaining)
-                </Button>
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {searchLoading ? 'Searching...' : `${filteredColleges.length} Colleges Found`}
+              </h2>
+              <div className="flex items-center text-blue-600">
+                <TrendingUp className="h-4 w-4 mr-1" />
+                <span className="text-sm">Updated daily</span>
+              </div>
+            </div>
+
+            {searchLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="h-96 bg-white/50 rounded-lg animate-pulse"></div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredColleges.map((college) => (
+                  <ImprovedCollegeCard
+                    key={college.id}
+                    college={college}
+                    onApply={handleApply}
+                    onCompare={handleCompare}
+                  />
+                ))}
               </div>
             )}
-          </>
-        ) : (
-          <Card className="text-center py-16 sm:py-20 border-blue-200 bg-white/80 backdrop-blur-sm">
-            <CardContent>
-              <Building2 className="h-16 sm:h-20 w-16 sm:w-20 text-blue-300 mx-auto mb-6" />
-              <h3 className="text-xl sm:text-2xl font-semibold text-blue-700 mb-3">No colleges found</h3>
-              <p className="text-blue-600 mb-8 px-4 max-w-md mx-auto">
-                We couldn't find any colleges matching your criteria. Try adjusting your search terms or filters.
-              </p>
-              <Button 
-                onClick={handleClearFilters}
-                className="bg-blue-600 hover:bg-blue-700 hover:scale-105 transition-all duration-200"
-              >
-                Clear All Filters
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+
+            {filteredColleges.length === 0 && !searchLoading && (
+              <div className="text-center py-12">
+                <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">No colleges found</h3>
+                <p className="text-gray-500">Try adjusting your search filters to find more results</p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="exams" className="space-y-6">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Entrance Exams</h2>
+              <p className="text-gray-600">Apply for entrance exams with just one click</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {entranceExams.map((exam) => (
+                <EntranceExamCard key={exam.id} exam={exam} />
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
       
       <Footer />

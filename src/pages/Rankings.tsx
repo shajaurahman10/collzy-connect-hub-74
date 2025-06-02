@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Trophy, TrendingUp, Award, Star } from 'lucide-react';
 
 const Rankings = () => {
-  const { privateColleges, loading } = useColleges();
+  const { colleges, loading } = useColleges();
 
   if (loading) {
     return (
@@ -34,12 +34,12 @@ const Rankings = () => {
             College Rankings & Analysis
           </h1>
           <p className="text-lg sm:text-xl text-blue-700 max-w-3xl mx-auto px-4 leading-relaxed">
-            Discover top-ranked colleges across India based on comprehensive analysis of NAAC grades, affiliations, and academic excellence.
+            Discover top-ranked colleges across India based on comprehensive analysis of NAAC grades, placement records, and academic excellence.
           </p>
         </div>
 
         <Tabs defaultValue="overall" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8">
+          <TabsList className="grid w-full grid-cols-4 mb-8 bg-white/50 backdrop-blur">
             <TabsTrigger value="overall" className="flex items-center space-x-2">
               <Trophy className="h-4 w-4" />
               <span>Overall</span>
@@ -59,27 +59,27 @@ const Rankings = () => {
           </TabsList>
 
           <TabsContent value="overall">
-            <CollegeRankings colleges={privateColleges} />
+            <CollegeRankings colleges={colleges} />
           </TabsContent>
 
           <TabsContent value="state">
-            <div className="text-center py-12">
-              <h3 className="text-xl font-semibold mb-4">State-wise Rankings Coming Soon</h3>
-              <p className="text-gray-600">We're working on detailed state-wise college rankings.</p>
+            <div className="text-center py-12 bg-white/50 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 text-gray-700">State-wise Rankings Coming Soon</h3>
+              <p className="text-gray-600">We're working on detailed state-wise college rankings to help you find the best colleges in your region.</p>
             </div>
           </TabsContent>
 
           <TabsContent value="category">
-            <div className="text-center py-12">
-              <h3 className="text-xl font-semibold mb-4">Category-wise Rankings Coming Soon</h3>
-              <p className="text-gray-600">Rankings by engineering, medical, management, and other categories.</p>
+            <div className="text-center py-12 bg-white/50 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 text-gray-700">Category-wise Rankings Coming Soon</h3>
+              <p className="text-gray-600">Rankings by engineering, medical, management, and other categories will be available soon.</p>
             </div>
           </TabsContent>
 
           <TabsContent value="rising">
-            <div className="text-center py-12">
-              <h3 className="text-xl font-semibold mb-4">Rising Stars Coming Soon</h3>
-              <p className="text-gray-600">Discover emerging colleges with rapid growth and innovation.</p>
+            <div className="text-center py-12 bg-white/50 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 text-gray-700">Rising Stars Coming Soon</h3>
+              <p className="text-gray-600">Discover emerging colleges with rapid growth and innovation in education.</p>
             </div>
           </TabsContent>
         </Tabs>

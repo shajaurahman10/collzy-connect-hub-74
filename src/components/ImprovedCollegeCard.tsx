@@ -1,13 +1,9 @@
 
-import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, MapPin, Users, Globe, Phone, Heart } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { useProfile } from '@/hooks/useProfile';
-import { useToast } from '@/hooks/use-toast';
-import { generateApplicationEmail, openGmailCompose } from '@/utils/emailService';
+import { Button } from '@/components/ui/button';
+import { MapPin, Users, GraduationCap, Star, Phone, Mail, Globe, Heart, ExternalLink } from 'lucide-react';
+import { useState } from 'react';
 
 interface College {
   id: string;
@@ -15,184 +11,161 @@ interface College {
   city: string;
   state: string;
   type: string;
-  rating: number;
-  students: number;
-  description: string;
-  courses: string[];
-  email: string;
-  phone: string;
-  website: string;
-  image?: string;
-  founded: number;
+  established_year: number;
+  naac_grade: string;
+  website?: string;
+  admission_email?: string;
+  phone?: string;
+  courses_offered: string[];
+  total_fees: number;
+  hostel_available: boolean;
+  placement_percentage: number;
+  average_package: number;
+  highest_package: number;
+  student_strength?: number;
+  image_url?: string;
 }
 
 interface ImprovedCollegeCardProps {
   college: College;
-  onFavorite?: (collegeId: string, isFavorited: boolean) => void;
+  onApply?: (collegeId: string) => void;
+  onCompare?: (college: College) => void;
 }
 
-const ImprovedCollegeCard = ({ college, onFavorite }: ImprovedCollegeCardProps) => {
-  const [isFavorited, setIsFavorited] = useState(false);
-  const { user } = useAuth();
-  const { profile } = useProfile();
-  const { toast } = useToast();
+const ImprovedCollegeCard = ({ college, onApply, onCompare }: ImprovedCollegeCardProps) => {
+  const [isFavorite, setIsFavorite] = useState(false);
 
-  const handleApply = () => {
-    if (!user) {
-      toast({
-        title: "Please log in",
-        description: "You need to log in to apply to colleges.",
-        variant: "destructive",
-      });
-      window.location.href = '/auth';
-      return;
-    }
-
-    if (!profile) {
-      toast({
-        title: "Complete your profile",
-        description: "Please complete your profile before applying to colleges.",
-        variant: "destructive",
-      });
-      window.location.href = '/create-profile';
-      return;
-    }
-
-    // Generate and send email
-    const emailData = generateApplicationEmail(profile, college);
-    openGmailCompose(emailData);
-
-    toast({
-      title: "🎉 Application initiated successfully!",
-      description: "Gmail has been opened with a pre-filled application. Please send the email to complete your application. Share Collzy with your friends!",
-      duration: 6000,
-    });
-  };
-
-  const handleFavorite = () => {
-    const newFavoriteState = !isFavorited;
-    setIsFavorited(newFavoriteState);
-    onFavorite?.(college.id, newFavoriteState);
-  };
-
-  const handleWebsite = () => {
-    if (college.website) {
-      window.open(college.website, '_blank');
+  const getGradeColor = (grade: string) => {
+    switch (grade) {
+      case 'A++': return 'bg-green-100 text-green-800 border-green-200';
+      case 'A+': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'A': return 'bg-purple-100 text-purple-800 border-purple-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  const handleCall = () => {
-    if (college.phone) {
-      window.open(`tel:${college.phone}`, '_self');
+  const formatFees = (fees: number) => {
+    if (fees >= 100000) {
+      return `₹${(fees / 100000).toFixed(1)}L`;
     }
-  };
-
-  const handleMoreInfo = () => {
-    toast({
-      title: "More Information",
-      description: `For detailed information about ${college.name}, please visit their website or contact them directly.`,
-    });
+    return `₹${(fees / 1000).toFixed(0)}K`;
   };
 
   return (
-    <Card className="h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
-      <CardContent className="p-6 h-full flex flex-col">
-        {/* Header */}
-        <div className="flex justify-between items-start mb-4">
+    <Card className="h-full hover:shadow-lg transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-white to-blue-50/30">
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-start gap-3">
           <div className="flex-1">
-            <h3 className="font-bold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-2">
-              {college.name}
-            </h3>
+            <h3 className="font-bold text-lg text-gray-900 leading-tight mb-2">{college.name}</h3>
             <div className="flex items-center text-gray-600 mb-2">
-              <MapPin className="h-4 w-4 mr-1" />
+              <MapPin className="h-4 w-4 mr-1 text-blue-500" />
               <span className="text-sm">{college.city}, {college.state}</span>
             </div>
           </div>
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleFavorite}
+            onClick={() => setIsFavorite(!isFavorite)}
             className="text-gray-400 hover:text-red-500 p-1"
           >
-            <Heart className={`h-5 w-5 ${isFavorited ? 'fill-red-500 text-red-500' : ''}`} />
+            <Heart className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
           </Button>
         </div>
-
-        {/* Stats */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center">
-            <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
-            <span className="font-medium text-gray-900">{college.rating}</span>
-          </div>
-          <Badge variant={college.type === 'Public' ? 'default' : 'secondary'}>
+        
+        <div className="flex flex-wrap gap-2">
+          <Badge className={`${getGradeColor(college.naac_grade)} font-medium`}>
+            NAAC {college.naac_grade}
+          </Badge>
+          <Badge variant="outline" className="text-blue-600 border-blue-200">
             {college.type}
           </Badge>
+          <Badge variant="outline" className="text-green-600 border-green-200">
+            Est. {college.established_year}
+          </Badge>
+        </div>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
+        {/* Key Stats */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-blue-50 p-3 rounded-lg">
+            <div className="flex items-center text-blue-600 mb-1">
+              <GraduationCap className="h-4 w-4 mr-1" />
+              <span className="text-xs font-medium">Placement</span>
+            </div>
+            <p className="text-sm font-bold text-blue-800">{college.placement_percentage}%</p>
+          </div>
+          
+          <div className="bg-green-50 p-3 rounded-lg">
+            <div className="flex items-center text-green-600 mb-1">
+              <Star className="h-4 w-4 mr-1" />
+              <span className="text-xs font-medium">Avg Package</span>
+            </div>
+            <p className="text-sm font-bold text-green-800">₹{college.average_package}L</p>
+          </div>
         </div>
 
-        {/* Students count */}
-        <div className="flex items-center text-gray-600 mb-4">
-          <Users className="h-4 w-4 mr-1" />
-          <span className="text-sm">{college.students?.toLocaleString()} students</span>
+        {/* Fees */}
+        <div className="bg-orange-50 p-3 rounded-lg">
+          <p className="text-xs text-orange-600 font-medium mb-1">Annual Fees</p>
+          <p className="text-lg font-bold text-orange-800">{formatFees(college.total_fees)}</p>
         </div>
-
-        {/* Description */}
-        <p className="text-sm text-gray-600 mb-4 line-clamp-3 flex-1">
-          {college.description}
-        </p>
 
         {/* Courses */}
-        <div className="mb-6">
-          <p className="text-xs text-gray-500 mb-2">Popular Courses:</p>
+        <div>
+          <p className="text-xs font-medium text-gray-600 mb-2">Popular Courses</p>
           <div className="flex flex-wrap gap-1">
-            {college.courses.slice(0, 3).map((course, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
+            {college.courses_offered.slice(0, 3).map((course, index) => (
+              <Badge key={index} variant="secondary" className="text-xs px-2 py-1">
                 {course}
               </Badge>
             ))}
-            {college.courses.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                +{college.courses.length - 3} more
+            {college.courses_offered.length > 3 && (
+              <Badge variant="secondary" className="text-xs px-2 py-1">
+                +{college.courses_offered.length - 3} more
               </Badge>
             )}
           </div>
         </div>
 
-        {/* Action Buttons - 2x2 Grid */}
-        <div className="grid grid-cols-2 gap-2 mt-auto">
+        {/* Contact Info */}
+        <div className="grid grid-cols-3 gap-2 text-center">
+          {college.phone && (
+            <Button size="sm" variant="outline" className="text-xs p-2">
+              <Phone className="h-3 w-3" />
+            </Button>
+          )}
+          {college.admission_email && (
+            <Button size="sm" variant="outline" className="text-xs p-2">
+              <Mail className="h-3 w-3" />
+            </Button>
+          )}
+          {college.website && (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="text-xs p-2"
+              onClick={() => window.open(college.website, '_blank')}
+            >
+              <Globe className="h-3 w-3" />
+            </Button>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2 pt-2">
           <Button 
-            onClick={handleApply}
-            className="bg-green-600 hover:bg-green-700 text-white font-medium transition-all duration-200 hover:scale-105"
-            size="sm"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={() => onApply?.(college.id)}
           >
             Apply Now
           </Button>
           <Button 
             variant="outline" 
-            onClick={handleWebsite}
-            disabled={!college.website}
-            size="sm"
-            className="hover:scale-105 transition-all duration-200"
+            className="border-blue-200 text-blue-600 hover:bg-blue-50"
+            onClick={() => onCompare?.(college)}
           >
-            <Globe className="h-4 w-4 mr-1" />
-            Website
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={handleCall}
-            disabled={!college.phone}
-            size="sm"
-            className="hover:scale-105 transition-all duration-200"
-          >
-            <Phone className="h-4 w-4 mr-1" />
-            Call
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={handleMoreInfo}
-            size="sm"
-            className="hover:scale-105 transition-all duration-200"
-          >
-            More Info
+            Compare
           </Button>
         </div>
       </CardContent>
