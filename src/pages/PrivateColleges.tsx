@@ -13,9 +13,24 @@ import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { useColleges } from '@/hooks/useColleges';
 
+// Define the interface for our private college card props
+interface PrivateCollege {
+  id: string;
+  name: string;
+  city: string;
+  state: string;
+  website?: string;
+  admission_email?: string;
+  phone?: string;
+  affiliation?: string;
+  naac_grade?: string;
+  type: string;
+  created_at: string;
+}
+
 const PrivateColleges = () => {
   const { colleges, loading: collegesLoading } = useColleges();
-  const [displayedColleges, setDisplayedColleges] = useState([]);
+  const [displayedColleges, setDisplayedColleges] = useState<PrivateCollege[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedState, setSelectedState] = useState('all');
   const [selectedGrade, setSelectedGrade] = useState('all');
@@ -27,9 +42,24 @@ const PrivateColleges = () => {
   const [collegesPerPage] = useState(24);
   const { toast } = useToast();
 
-  // Filter only private colleges and get unique states and grades
-  const privateColleges = colleges.filter(college => college.type === 'Private');
-  const states = [...new Set(privateColleges.map(college => college.state))].sort();
+  // Filter only private colleges and convert to our interface
+  const privateColleges: PrivateCollege[] = colleges
+    .filter(college => college.type === 'Private')
+    .map(college => ({
+      id: college.id,
+      name: college.name,
+      city: college.city,
+      state: college.state,
+      website: college.website || undefined,
+      admission_email: college.admission_email || undefined,
+      phone: college.phone || undefined,
+      affiliation: college.affiliation || undefined,
+      naac_grade: college.naac_grade || undefined,
+      type: college.type,
+      created_at: college.created_at,
+    }));
+
+  const states = [...new Set(privateColleges.map(college => college.state))].filter(Boolean).sort();
   const grades = [...new Set(privateColleges.map(college => college.naac_grade).filter(Boolean))].sort();
 
   const filteredAndSortedColleges = privateColleges
