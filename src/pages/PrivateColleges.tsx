@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, Search, Filter, BarChart3 } from 'lucide-react';
+import { Building2, Search, Filter, BarChart3, MapPin, GraduationCap, Award, Users } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import PrivateCollegeCard from '@/components/PrivateCollegeCard';
 import CollegeComparison from '@/components/CollegeComparison';
@@ -12,6 +12,7 @@ import AdvancedCollegeSearch from '@/components/AdvancedCollegeSearch';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { useColleges } from '@/hooks/useColleges';
+import { Badge } from '@/components/ui/badge';
 
 // Define the interface for our private college card props to match PrivateCollegeCard expectations
 interface PrivateCollege {
@@ -26,15 +27,24 @@ interface PrivateCollege {
   naac_grade?: string;
   type: string;
   created_at: string;
-  contact_number?: string; // Added to match PrivateCollegeCard expectations
+  contact_number?: string;
 }
+
+// City categorization for better organization
+const cityRegions = {
+  'Tech Hubs': ['Bangalore', 'Hyderabad', 'Chennai'],
+  'Educational Centers': ['Kochi', 'Coimbatore', 'Guntur', 'Visakhapatnam'],
+  'Emerging Cities': ['Tirupati', 'Amaravati', 'Kozhikode', 'Malappuram', 'Vengara']
+};
 
 const PrivateColleges = () => {
   const { colleges, loading: collegesLoading } = useColleges();
   const [displayedColleges, setDisplayedColleges] = useState<PrivateCollege[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedState, setSelectedState] = useState('all');
+  const [selectedCity, setSelectedCity] = useState('all');
   const [selectedGrade, setSelectedGrade] = useState('all');
+  const [selectedType, setSelectedType] = useState('all');
   const [sortBy, setSortBy] = useState('name');
   const [showFilters, setShowFilters] = useState(false);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
@@ -43,9 +53,8 @@ const PrivateColleges = () => {
   const [collegesPerPage] = useState(24);
   const { toast } = useToast();
 
-  // Filter only private colleges and convert to our interface
-  const privateColleges: PrivateCollege[] = colleges
-    .filter(college => college.type === 'Private')
+  // Filter colleges and convert to our interface
+  const allColleges: PrivateCollege[] = colleges
     .map(college => ({
       id: college.id,
       name: college.name,
@@ -58,20 +67,27 @@ const PrivateColleges = () => {
       naac_grade: college.naac_grade || undefined,
       type: college.type,
       created_at: college.created_at,
-      contact_number: college.phone || undefined, // Map phone to contact_number for compatibility
+      contact_number: college.phone || undefined,
     }));
 
-  const states = [...new Set(privateColleges.map(college => college.state))].filter(Boolean).sort();
-  const grades = [...new Set(privateColleges.map(college => college.naac_grade).filter(Boolean))].sort();
+  const privateColleges = allColleges.filter(college => college.type === 'Private');
+  const governmentColleges = allColleges.filter(college => college.type === 'Government');
 
-  const filteredAndSortedColleges = privateColleges
+  const states = [...new Set(allColleges.map(college => college.state))].filter(Boolean).sort();
+  const cities = [...new Set(allColleges.map(college => college.city))].filter(Boolean).sort();
+  const grades = [...new Set(allColleges.map(college => college.naac_grade).filter(Boolean))].sort();
+  const types = [...new Set(allColleges.map(college => college.type))].filter(Boolean).sort();
+
+  const filteredAndSortedColleges = allColleges
     .filter(college => {
       const matchesSearch = college.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            college.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            college.state.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesState = selectedState === 'all' || college.state === selectedState;
+      const matchesCity = selectedCity === 'all' || college.city === selectedCity;
       const matchesGrade = selectedGrade === 'all' || college.naac_grade === selectedGrade;
-      return matchesSearch && matchesState && matchesGrade;
+      const matchesType = selectedType === 'all' || college.type === selectedType;
+      return matchesSearch && matchesState && matchesCity && matchesGrade && matchesType;
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -79,6 +95,8 @@ const PrivateColleges = () => {
           return a.name.localeCompare(b.name);
         case 'state':
           return a.state.localeCompare(b.state);
+        case 'city':
+          return a.city.localeCompare(b.city);
         case 'grade':
           const gradeOrder = { 'A++': 6, 'A+': 5, 'A': 4, 'B++': 3, 'B+': 2, 'B': 1 };
           return (gradeOrder[b.naac_grade as keyof typeof gradeOrder] || 0) - (gradeOrder[a.naac_grade as keyof typeof gradeOrder] || 0);
@@ -86,6 +104,15 @@ const PrivateColleges = () => {
           return 0;
       }
     });
+
+  // Statistics for display
+  const stats = {
+    total: allColleges.length,
+    private: privateColleges.length,
+    government: governmentColleges.length,
+    states: states.length,
+    topGrade: allColleges.filter(c => c.naac_grade === 'A++').length
+  };
 
   // Implement pagination
   useEffect(() => {
@@ -108,13 +135,14 @@ const PrivateColleges = () => {
   const handleClearFilters = () => {
     setSearchTerm('');
     setSelectedState('all');
+    setSelectedCity('all');
     setSelectedGrade('all');
+    setSelectedType('all');
     setSortBy('name');
     setCurrentPage(1);
   };
 
   const handleAdvancedSearch = (filters: any) => {
-    // Apply advanced filters logic here
     console.log('Advanced search filters:', filters);
     toast({
       title: "Search Applied",
@@ -123,12 +151,7 @@ const PrivateColleges = () => {
   };
 
   const handleClearAdvancedSearch = () => {
-    // Clear all advanced filters
-    setSearchTerm('');
-    setSelectedState('all');
-    setSelectedGrade('all');
-    setSortBy('name');
-    setCurrentPage(1);
+    handleClearFilters();
   };
 
   if (collegesLoading) {
@@ -138,7 +161,7 @@ const PrivateColleges = () => {
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-blue-600 font-medium">Loading private colleges...</p>
+            <p className="text-blue-600 font-medium">Loading comprehensive college database...</p>
           </div>
         </div>
       </div>
@@ -150,16 +173,60 @@ const PrivateColleges = () => {
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header with new action buttons */}
+        {/* Enhanced Header with Statistics */}
         <div className="text-center mb-8 lg:mb-12 animate-fade-in">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-            Private Colleges in India
+            South India College Directory
           </h1>
           <p className="text-lg sm:text-xl text-blue-700 max-w-3xl mx-auto px-4 leading-relaxed mb-6">
-            Discover {privateColleges.length}+ verified UGC and NAAC approved private colleges across India. Find the perfect institution for your academic journey.
+            Discover {stats.total}+ verified colleges across {stats.states} states in South India. 
+            Find your perfect institution from prestigious IITs, IIMs to specialized colleges.
           </p>
           
-          {/* New Action Buttons */}
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 max-w-4xl mx-auto">
+            <Card className="bg-white/80 backdrop-blur-sm border-blue-200">
+              <CardContent className="p-4 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Building2 className="h-5 w-5 text-blue-600 mr-2" />
+                  <span className="text-2xl font-bold text-blue-800">{stats.total}</span>
+                </div>
+                <p className="text-sm text-blue-600">Total Colleges</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white/80 backdrop-blur-sm border-green-200">
+              <CardContent className="p-4 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Award className="h-5 w-5 text-green-600 mr-2" />
+                  <span className="text-2xl font-bold text-green-800">{stats.topGrade}</span>
+                </div>
+                <p className="text-sm text-green-600">A++ Rated</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white/80 backdrop-blur-sm border-purple-200">
+              <CardContent className="p-4 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <MapPin className="h-5 w-5 text-purple-600 mr-2" />
+                  <span className="text-2xl font-bold text-purple-800">{stats.states}</span>
+                </div>
+                <p className="text-sm text-purple-600">States Covered</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white/80 backdrop-blur-sm border-orange-200">
+              <CardContent className="p-4 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <GraduationCap className="h-5 w-5 text-orange-600 mr-2" />
+                  <span className="text-2xl font-bold text-orange-800">{stats.private}</span>
+                </div>
+                <p className="text-sm text-orange-600">Private Colleges</p>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Action Buttons */}
           <div className="flex flex-wrap justify-center gap-4 mb-6">
             <Button 
               onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
@@ -190,7 +257,7 @@ const PrivateColleges = () => {
           </div>
         )}
 
-        {/* Search and Filters */}
+        {/* Enhanced Search and Filters */}
         <div className="mb-8 space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
@@ -214,7 +281,7 @@ const PrivateColleges = () => {
 
           {showFilters && (
             <Card className="p-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">State</label>
                   <Select value={selectedState} onValueChange={setSelectedState}>
@@ -226,6 +293,40 @@ const PrivateColleges = () => {
                       {states.map((state) => (
                         <SelectItem key={state} value={state}>
                           {state}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">City</label>
+                  <Select value={selectedCity} onValueChange={setSelectedCity}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All cities" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Cities</SelectItem>
+                      {cities.map((city) => (
+                        <SelectItem key={city} value={city}>
+                          {city}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Type</label>
+                  <Select value={selectedType} onValueChange={setSelectedType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All types" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      {types.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -258,6 +359,7 @@ const PrivateColleges = () => {
                     <SelectContent>
                       <SelectItem value="name">Name</SelectItem>
                       <SelectItem value="state">State</SelectItem>
+                      <SelectItem value="city">City</SelectItem>
                       <SelectItem value="grade">NAAC Grade</SelectItem>
                     </SelectContent>
                   </Select>
@@ -277,18 +379,38 @@ const PrivateColleges = () => {
           )}
         </div>
 
-        {/* Results Summary */}
+        {/* Results Summary with Enhanced Information */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
           <div>
             <p className="text-blue-700 text-base sm:text-lg font-medium">
-              Found <span className="font-bold text-blue-800">{filteredAndSortedColleges.length}</span> private colleges
+              Found <span className="font-bold text-blue-800">{filteredAndSortedColleges.length}</span> colleges
               {searchTerm && (
                 <span> matching "<span className="font-semibold text-blue-900">{searchTerm}</span>"</span>
               )}
             </p>
-            {selectedState !== 'all' && (
-              <p className="text-sm text-blue-600 mt-1">in {selectedState}</p>
-            )}
+            <div className="flex flex-wrap gap-2 mt-2">
+              {selectedState !== 'all' && (
+                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                  <MapPin className="h-3 w-3 mr-1" />
+                  {selectedState}
+                </Badge>
+              )}
+              {selectedCity !== 'all' && (
+                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  {selectedCity}
+                </Badge>
+              )}
+              {selectedType !== 'all' && (
+                <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                  {selectedType}
+                </Badge>
+              )}
+              {selectedGrade !== 'all' && (
+                <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                  NAAC {selectedGrade}
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
 
@@ -342,7 +464,7 @@ const PrivateColleges = () => {
         )}
       </div>
       
-      {/* College Comparison Modal - Pass the full colleges array from useColleges */}
+      {/* College Comparison Modal */}
       {showComparison && (
         <CollegeComparison
           colleges={colleges}
