@@ -7,15 +7,38 @@ import { X, Plus, Star, MapPin, Users, Award, Globe, Phone, Mail } from 'lucide-
 import { useToast } from '@/hooks/use-toast';
 
 interface College {
-  id: number;
+  id: string;
   name: string;
   city: string;
   state: string;
-  website: string;
-  admission_email: string;
-  contact_number: string;
+  type: string;
+  established_year: number;
   affiliation: string;
   naac_grade: string;
+  nirf_ranking?: number;
+  website?: string;
+  admission_email?: string;
+  phone?: string;
+  address?: string;
+  courses_offered: string[];
+  total_fees: number;
+  hostel_available: boolean;
+  placement_percentage: number;
+  average_package: number;
+  highest_package: number;
+  accreditations?: string[];
+  facilities?: string[];
+  campus_size?: string;
+  student_strength?: number;
+  faculty_count?: number;
+  library_books?: number;
+  image_url?: string;
+  brochure_url?: string;
+  virtual_tour_url?: string;
+  status: string;
+  featured: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 interface CollegeComparisonProps {
@@ -145,23 +168,29 @@ const CollegeComparison = ({ colleges, onClose }: CollegeComparisonProps) => {
                       </div>
                       
                       <div className="space-y-2">
-                        <div className="flex items-center text-sm">
-                          <Globe className="h-4 w-4 mr-2 text-blue-600" />
-                          <a href={college.website} target="_blank" rel="noopener noreferrer" 
-                             className="text-blue-600 hover:underline truncate">
-                            Website
-                          </a>
-                        </div>
+                        {college.website && (
+                          <div className="flex items-center text-sm">
+                            <Globe className="h-4 w-4 mr-2 text-blue-600" />
+                            <a href={college.website} target="_blank" rel="noopener noreferrer" 
+                               className="text-blue-600 hover:underline truncate">
+                              Website
+                            </a>
+                          </div>
+                        )}
                         
-                        <div className="flex items-center text-sm">
-                          <Phone className="h-4 w-4 mr-2 text-green-600" />
-                          <span className="truncate">{college.contact_number}</span>
-                        </div>
+                        {college.phone && (
+                          <div className="flex items-center text-sm">
+                            <Phone className="h-4 w-4 mr-2 text-green-600" />
+                            <span className="truncate">{college.phone}</span>
+                          </div>
+                        )}
                         
-                        <div className="flex items-center text-sm">
-                          <Mail className="h-4 w-4 mr-2 text-red-600" />
-                          <span className="truncate">{college.admission_email}</span>
-                        </div>
+                        {college.admission_email && (
+                          <div className="flex items-center text-sm">
+                            <Mail className="h-4 w-4 mr-2 text-red-600" />
+                            <span className="truncate">{college.admission_email}</span>
+                          </div>
+                        )}
                       </div>
                       
                       <Button className="w-full bg-green-600 hover:bg-green-700">
