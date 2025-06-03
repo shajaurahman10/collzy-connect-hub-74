@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,7 @@ import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { useColleges } from '@/hooks/useColleges';
 
-// Define the interface for our private college card props
+// Define the interface for our private college card props to match PrivateCollegeCard expectations
 interface PrivateCollege {
   id: string;
   name: string;
@@ -26,6 +25,7 @@ interface PrivateCollege {
   naac_grade?: string;
   type: string;
   created_at: string;
+  contact_number?: string; // Added to match PrivateCollegeCard expectations
 }
 
 const PrivateColleges = () => {
@@ -57,6 +57,7 @@ const PrivateColleges = () => {
       naac_grade: college.naac_grade || undefined,
       type: college.type,
       created_at: college.created_at,
+      contact_number: college.phone || undefined, // Map phone to contact_number for compatibility
     }));
 
   const states = [...new Set(privateColleges.map(college => college.state))].filter(Boolean).sort();
