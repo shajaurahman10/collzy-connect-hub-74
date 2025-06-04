@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, Search, Filter, BarChart3, MapPin, GraduationCap, Award, Users } from 'lucide-react';
+import { Building2, Search, Filter, BarChart3, MapPin, GraduationCap, Award, Users, BookOpen, Calendar } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import PrivateCollegeCard from '@/components/PrivateCollegeCard';
 import CollegeComparison from '@/components/CollegeComparison';
@@ -14,8 +14,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useColleges } from '@/hooks/useColleges';
 import { Badge } from '@/components/ui/badge';
 
-// Define the interface for our private college card props to match PrivateCollegeCard expectations
-interface PrivateCollege {
+// Define the interface for our college data
+interface College {
   id: string;
   name: string;
   city: string;
@@ -28,18 +28,32 @@ interface PrivateCollege {
   type: string;
   created_at: string;
   contact_number?: string;
+  established_year?: number;
+  placement_percentage?: number;
+  average_package?: number;
+  highest_package?: number;
+  student_strength?: number;
+  faculty_count?: number;
+  courses_offered?: string[];
+  total_fees?: number;
 }
 
-// City categorization for better organization
-const cityRegions = {
-  'Tech Hubs': ['Bangalore', 'Hyderabad', 'Chennai'],
-  'Educational Centers': ['Kochi', 'Coimbatore', 'Guntur', 'Visakhapatnam'],
-  'Emerging Cities': ['Tirupati', 'Amaravati', 'Kozhikode', 'Malappuram', 'Vengara']
+// Enhanced city categorization for Kerala districts
+const keralaDistricts = {
+  'Northern Kerala': ['Kasargod', 'Kannur', 'Wayanad', 'Kozhikode'],
+  'Central Kerala': ['Malappuram', 'Palakkad', 'Thrissur', 'Ernakulam', 'Kochi'],
+  'Southern Kerala': ['Idukki', 'Kottayam', 'Alappuzha', 'Kollam', 'Thiruvananthapuram']
+};
+
+const majorCities = {
+  'Tech Hubs': ['Bangalore', 'Hyderabad', 'Chennai', 'Kochi'],
+  'Educational Centers': ['Kozhikode', 'Coimbatore', 'Guntur', 'Visakhapatnam', 'Thrissur'],
+  'Heritage Cities': ['Palakkad', 'Kollam', 'Kottayam', 'Kannur', 'Ernakulam']
 };
 
 const PrivateColleges = () => {
   const { colleges, loading: collegesLoading } = useColleges();
-  const [displayedColleges, setDisplayedColleges] = useState<PrivateCollege[]>([]);
+  const [displayedColleges, setDisplayedColleges] = useState<College[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedState, setSelectedState] = useState('all');
   const [selectedCity, setSelectedCity] = useState('all');
@@ -53,23 +67,32 @@ const PrivateColleges = () => {
   const [collegesPerPage] = useState(24);
   const { toast } = useToast();
 
-  // Filter colleges and convert to our interface
-  const allColleges: PrivateCollege[] = colleges
-    .map(college => ({
-      id: college.id,
-      name: college.name,
-      city: college.city,
-      state: college.state,
-      website: college.website || undefined,
-      admission_email: college.admission_email || undefined,
-      phone: college.phone || undefined,
-      affiliation: college.affiliation || undefined,
-      naac_grade: college.naac_grade || undefined,
-      type: college.type,
-      created_at: college.created_at,
-      contact_number: college.phone || undefined,
-    }));
+  // Convert and filter colleges
+  const allColleges: College[] = colleges.map(college => ({
+    id: college.id,
+    name: college.name,
+    city: college.city,
+    state: college.state,
+    website: college.website || undefined,
+    admission_email: college.admission_email || undefined,
+    phone: college.phone || undefined,
+    affiliation: college.affiliation || undefined,
+    naac_grade: college.naac_grade || undefined,
+    type: college.type,
+    created_at: college.created_at,
+    contact_number: college.phone || undefined,
+    established_year: college.established_year || undefined,
+    placement_percentage: college.placement_percentage || undefined,
+    average_package: college.average_package || undefined,
+    highest_package: college.highest_package || undefined,
+    student_strength: college.student_strength || undefined,
+    faculty_count: college.faculty_count || undefined,
+    courses_offered: college.courses_offered || undefined,
+    total_fees: college.total_fees || undefined,
+  }));
 
+  const keralaDominantColleges = allColleges.filter(college => college.state === 'Kerala');
+  const otherStatesColleges = allColleges.filter(college => college.state !== 'Kerala');
   const privateColleges = allColleges.filter(college => college.type === 'Private');
   const governmentColleges = allColleges.filter(college => college.type === 'Government');
 
@@ -82,7 +105,11 @@ const PrivateColleges = () => {
     .filter(college => {
       const matchesSearch = college.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            college.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           college.state.toLowerCase().includes(searchTerm.toLowerCase());
+                           college.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           college.affiliation?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           college.courses_offered?.some(course => 
+                             course.toLowerCase().includes(searchTerm.toLowerCase())
+                           );
       const matchesState = selectedState === 'all' || college.state === selectedState;
       const matchesCity = selectedCity === 'all' || college.city === selectedCity;
       const matchesGrade = selectedGrade === 'all' || college.naac_grade === selectedGrade;
@@ -97,21 +124,32 @@ const PrivateColleges = () => {
           return a.state.localeCompare(b.state);
         case 'city':
           return a.city.localeCompare(b.city);
+        case 'established':
+          return (b.established_year || 0) - (a.established_year || 0);
         case 'grade':
           const gradeOrder = { 'A++': 6, 'A+': 5, 'A': 4, 'B++': 3, 'B+': 2, 'B': 1 };
           return (gradeOrder[b.naac_grade as keyof typeof gradeOrder] || 0) - (gradeOrder[a.naac_grade as keyof typeof gradeOrder] || 0);
+        case 'placement':
+          return (b.placement_percentage || 0) - (a.placement_percentage || 0);
         default:
           return 0;
       }
     });
 
-  // Statistics for display
+  // Enhanced statistics
   const stats = {
     total: allColleges.length,
+    kerala: keralaDominantColleges.length,
     private: privateColleges.length,
     government: governmentColleges.length,
     states: states.length,
-    topGrade: allColleges.filter(c => c.naac_grade === 'A++').length
+    topGrade: allColleges.filter(c => c.naac_grade === 'A++').length,
+    engineering: allColleges.filter(c => 
+      c.courses_offered?.some(course => course.toLowerCase().includes('engineering'))
+    ).length,
+    managementColleges: allColleges.filter(c => 
+      c.courses_offered?.some(course => course.toLowerCase().includes('management'))
+    ).length
   };
 
   // Implement pagination
@@ -173,19 +211,19 @@ const PrivateColleges = () => {
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Enhanced Header with Statistics */}
+        {/* Enhanced Header with Comprehensive Statistics */}
         <div className="text-center mb-8 lg:mb-12 animate-fade-in">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-            South India College Directory
+            Complete South India College Directory
           </h1>
-          <p className="text-lg sm:text-xl text-blue-700 max-w-3xl mx-auto px-4 leading-relaxed mb-6">
+          <p className="text-lg sm:text-xl text-blue-700 max-w-4xl mx-auto px-4 leading-relaxed mb-6">
             Discover {stats.total}+ verified colleges across {stats.states} states in South India. 
-            Find your perfect institution from prestigious IITs, IIMs to specialized colleges.
+            Featuring {stats.kerala}+ Kerala colleges, from IITs to specialized institutions including Kasaragod LBS, Kozhikode KMCT and many more prestigious institutions.
           </p>
           
-          {/* Statistics Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 max-w-4xl mx-auto">
-            <Card className="bg-white/80 backdrop-blur-sm border-blue-200">
+          {/* Comprehensive Statistics Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8 max-w-6xl mx-auto">
+            <Card className="bg-white/80 backdrop-blur-sm border-blue-200 hover:shadow-lg transition-shadow">
               <CardContent className="p-4 text-center">
                 <div className="flex items-center justify-center mb-2">
                   <Building2 className="h-5 w-5 text-blue-600 mr-2" />
@@ -194,8 +232,8 @@ const PrivateColleges = () => {
                 <p className="text-sm text-blue-600">Total Colleges</p>
               </CardContent>
             </Card>
-            
-            <Card className="bg-white/80 backdrop-blur-sm border-green-200">
+
+            <Card className="bg-white/80 backdrop-blur-sm border-green-200 hover:shadow-lg transition-shadow">
               <CardContent className="p-4 text-center">
                 <div className="flex items-center justify-center mb-2">
                   <Award className="h-5 w-5 text-green-600 mr-2" />
@@ -204,34 +242,54 @@ const PrivateColleges = () => {
                 <p className="text-sm text-green-600">A++ Rated</p>
               </CardContent>
             </Card>
-            
-            <Card className="bg-white/80 backdrop-blur-sm border-purple-200">
+
+            <Card className="bg-white/80 backdrop-blur-sm border-purple-200 hover:shadow-lg transition-shadow">
               <CardContent className="p-4 text-center">
                 <div className="flex items-center justify-center mb-2">
                   <MapPin className="h-5 w-5 text-purple-600 mr-2" />
-                  <span className="text-2xl font-bold text-purple-800">{stats.states}</span>
+                  <span className="text-2xl font-bold text-purple-800">{stats.kerala}</span>
                 </div>
-                <p className="text-sm text-purple-600">States Covered</p>
+                <p className="text-sm text-purple-600">Kerala Colleges</p>
               </CardContent>
             </Card>
-            
-            <Card className="bg-white/80 backdrop-blur-sm border-orange-200">
+
+            <Card className="bg-white/80 backdrop-blur-sm border-orange-200 hover:shadow-lg transition-shadow">
               <CardContent className="p-4 text-center">
                 <div className="flex items-center justify-center mb-2">
-                  <GraduationCap className="h-5 w-5 text-orange-600 mr-2" />
+                  <Users className="h-5 w-5 text-orange-600 mr-2" />
                   <span className="text-2xl font-bold text-orange-800">{stats.private}</span>
                 </div>
                 <p className="text-sm text-orange-600">Private Colleges</p>
               </CardContent>
             </Card>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-indigo-200 hover:shadow-lg transition-shadow">
+              <CardContent className="p-4 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <GraduationCap className="h-5 w-5 text-indigo-600 mr-2" />
+                  <span className="text-2xl font-bold text-indigo-800">{stats.engineering}</span>
+                </div>
+                <p className="text-sm text-indigo-600">Engineering</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-pink-200 hover:shadow-lg transition-shadow">
+              <CardContent className="p-4 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <BookOpen className="h-5 w-5 text-pink-600 mr-2" />
+                  <span className="text-2xl font-bold text-pink-800">{stats.managementColleges}</span>
+                </div>
+                <p className="text-sm text-pink-600">Management</p>
+              </CardContent>
+            </Card>
           </div>
-          
+
           {/* Action Buttons */}
           <div className="flex flex-wrap justify-center gap-4 mb-6">
             <Button 
               onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
               variant="outline"
-              className="bg-white hover:bg-blue-50"
+              className="bg-white hover:bg-blue-50 border-blue-200"
             >
               <Search className="h-4 w-4 mr-2" />
               Advanced Search
@@ -239,11 +297,38 @@ const PrivateColleges = () => {
             <Button 
               onClick={() => setShowComparison(true)}
               variant="outline"
-              className="bg-white hover:bg-blue-50"
+              className="bg-white hover:bg-blue-50 border-blue-200"
             >
               <BarChart3 className="h-4 w-4 mr-2" />
               Compare Colleges
             </Button>
+            <Button 
+              onClick={() => setSelectedState('Kerala')}
+              variant="outline"
+              className="bg-white hover:bg-green-50 border-green-200"
+            >
+              <MapPin className="h-4 w-4 mr-2" />
+              Kerala Focus
+            </Button>
+          </div>
+
+          {/* Featured Kerala Districts Highlight */}
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 mb-6">
+            <h3 className="text-lg font-semibold text-green-800 mb-3">Kerala Education Districts</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              {Object.entries(keralaDistricts).map(([region, districts]) => (
+                <div key={region} className="text-center">
+                  <h4 className="font-medium text-green-700 mb-2">{region}</h4>
+                  <div className="flex flex-wrap justify-center gap-1">
+                    {districts.map(district => (
+                      <Badge key={district} variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                        {district}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -263,16 +348,16 @@ const PrivateColleges = () => {
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="Search colleges by name, city, or state..."
+                placeholder="Search colleges by name, city, state, courses, or affiliation..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 border-blue-200 focus:border-blue-400"
               />
             </div>
             <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
-              className="sm:w-auto w-full"
+              className="sm:w-auto w-full border-blue-200 hover:bg-blue-50"
             >
               <Filter className="h-4 w-4 mr-2" />
               Filters
@@ -280,19 +365,19 @@ const PrivateColleges = () => {
           </div>
 
           {showFilters && (
-            <Card className="p-4">
+            <Card className="p-6 border-blue-200">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">State</label>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">State</label>
                   <Select value={selectedState} onValueChange={setSelectedState}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-gray-300">
                       <SelectValue placeholder="All states" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All States</SelectItem>
                       {states.map((state) => (
                         <SelectItem key={state} value={state}>
-                          {state}
+                          {state} {state === 'Kerala' && `(${keralaDominantColleges.length})`}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -300,9 +385,9 @@ const PrivateColleges = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">City</label>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">City</label>
                   <Select value={selectedCity} onValueChange={setSelectedCity}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-gray-300">
                       <SelectValue placeholder="All cities" />
                     </SelectTrigger>
                     <SelectContent>
@@ -317,9 +402,9 @@ const PrivateColleges = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Type</label>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Type</label>
                   <Select value={selectedType} onValueChange={setSelectedType}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-gray-300">
                       <SelectValue placeholder="All types" />
                     </SelectTrigger>
                     <SelectContent>
@@ -334,9 +419,9 @@ const PrivateColleges = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">NAAC Grade</label>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">NAAC Grade</label>
                   <Select value={selectedGrade} onValueChange={setSelectedGrade}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-gray-300">
                       <SelectValue placeholder="All grades" />
                     </SelectTrigger>
                     <SelectContent>
@@ -351,16 +436,18 @@ const PrivateColleges = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Sort By</label>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Sort By</label>
                   <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-gray-300">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="name">Name</SelectItem>
+                      <SelectItem value="name">Name A-Z</SelectItem>
                       <SelectItem value="state">State</SelectItem>
                       <SelectItem value="city">City</SelectItem>
                       <SelectItem value="grade">NAAC Grade</SelectItem>
+                      <SelectItem value="established">Newest First</SelectItem>
+                      <SelectItem value="placement">Best Placement</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -369,9 +456,9 @@ const PrivateColleges = () => {
                   <Button 
                     variant="outline" 
                     onClick={handleClearFilters}
-                    className="w-full"
+                    className="w-full border-red-200 text-red-600 hover:bg-red-50"
                   >
-                    Clear Filters
+                    Clear All
                   </Button>
                 </div>
               </div>
@@ -379,7 +466,7 @@ const PrivateColleges = () => {
           )}
         </div>
 
-        {/* Results Summary with Enhanced Information */}
+        {/* Enhanced Results Summary */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
           <div>
             <p className="text-blue-700 text-base sm:text-lg font-medium">
