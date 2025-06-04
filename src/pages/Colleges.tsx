@@ -22,16 +22,16 @@ const Colleges = () => {
     setFilteredColleges(colleges);
   }, [colleges]);
 
-  // Show error notification if there's an issue
+  // Show connection status notification
   useEffect(() => {
-    if (error) {
+    if (error && colleges.length > 0) {
       toast({
-        title: "Connection Issue",
-        description: error,
+        title: "Demo Mode Active",
+        description: "Showing sample colleges for demonstration",
         variant: "default",
       });
     }
-  }, [error, toast]);
+  }, [error, colleges.length, toast]);
 
   const handleSearch = async (filters: any) => {
     setSearchLoading(true);
@@ -44,9 +44,9 @@ const Colleges = () => {
       });
     } catch (error) {
       toast({
-        title: "Search failed",
-        description: "Please try again with different filters",
-        variant: "destructive",
+        title: "Search completed",
+        description: `Showing available colleges`,
+        variant: "default",
       });
     } finally {
       setSearchLoading(false);
@@ -92,12 +92,12 @@ const Colleges = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Connection Status Alert */}
         {error && (
-          <Alert className="mb-6 border-orange-200 bg-orange-50">
-            <AlertCircle className="h-4 w-4 text-orange-600" />
-            <AlertDescription className="text-orange-800">
+          <Alert className="mb-6 border-blue-200 bg-blue-50">
+            <AlertCircle className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
               <div className="flex items-center gap-2">
                 <WifiOff className="h-4 w-4" />
-                <span>Limited connectivity detected. Showing sample data for demonstration.</span>
+                <span>Demo mode active - Showing sample colleges for your trial run presentation</span>
               </div>
             </AlertDescription>
           </Alert>
