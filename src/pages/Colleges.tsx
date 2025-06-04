@@ -7,12 +7,13 @@ import AdvancedCollegeSearch from '@/components/AdvancedCollegeSearch';
 import EntranceExamCard from '@/components/EntranceExamCard';
 import { useColleges } from '@/hooks/useColleges';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GraduationCap, BookOpen, Search, TrendingUp, Users, Award } from 'lucide-react';
+import { GraduationCap, BookOpen, Search, TrendingUp, Users, Award, AlertCircle, Wifi, WifiOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Colleges = () => {
-  const { colleges, entranceExams, loading, searchColleges } = useColleges();
+  const { colleges, entranceExams, loading, error, searchColleges } = useColleges();
   const [filteredColleges, setFilteredColleges] = useState(colleges);
   const [searchLoading, setSearchLoading] = useState(false);
   const { toast } = useToast();
@@ -20,6 +21,17 @@ const Colleges = () => {
   useEffect(() => {
     setFilteredColleges(colleges);
   }, [colleges]);
+
+  // Show error notification if there's an issue
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Connection Issue",
+        description: error,
+        variant: "default",
+      });
+    }
+  }, [error, toast]);
 
   const handleSearch = async (filters: any) => {
     setSearchLoading(true);
@@ -50,7 +62,6 @@ const Colleges = () => {
       title: "Application Started",
       description: "Redirecting to application portal...",
     });
-    // Here you would typically redirect to the application process
   };
 
   const handleCompare = (college: any) => {
@@ -58,7 +69,6 @@ const Colleges = () => {
       title: "Added to Comparison",
       description: `${college.name} has been added to your comparison list`,
     });
-    // Here you would add to comparison state
   };
 
   if (loading) {
@@ -80,6 +90,19 @@ const Colleges = () => {
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Connection Status Alert */}
+        {error && (
+          <Alert className="mb-6 border-orange-200 bg-orange-50">
+            <AlertCircle className="h-4 w-4 text-orange-600" />
+            <AlertDescription className="text-orange-800">
+              <div className="flex items-center gap-2">
+                <WifiOff className="h-4 w-4" />
+                <span>Limited connectivity detected. Showing sample data for demonstration.</span>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="text-center mb-8">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
             Discover Your Dream College
@@ -87,6 +110,12 @@ const Colleges = () => {
           <p className="text-lg sm:text-xl text-blue-700 max-w-3xl mx-auto px-4 leading-relaxed">
             Explore {colleges.length}+ verified colleges across India. Find the perfect match for your career aspirations with our comprehensive search and comparison tools.
           </p>
+          {!error && (
+            <div className="flex items-center justify-center mt-4 text-green-600">
+              <Wifi className="h-4 w-4 mr-2" />
+              <span className="text-sm">Live data connected</span>
+            </div>
+          )}
         </div>
 
         {/* Stats Cards */}
