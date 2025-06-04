@@ -33,7 +33,7 @@ const Navigation = () => {
 
   const navigationItems = [
     { name: 'Home', path: '/', icon: GraduationCap },
-    { name: 'Colleges', path: '/private-colleges', icon: Building2 },
+    { name: 'Colleges', path: '/colleges', icon: Building2 },
     { name: 'Rankings', path: '/rankings', icon: Trophy },
     { name: 'Tracker', path: '/tracker', icon: BarChart3 },
   ];

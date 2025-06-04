@@ -12,16 +12,20 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
 
 const Colleges = () => {
+  console.log('Colleges page loading...');
+  
   const { colleges, entranceExams, loading, searchColleges } = useColleges();
   const [filteredColleges, setFilteredColleges] = useState(colleges);
   const [searchLoading, setSearchLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log('Colleges data updated:', colleges.length);
     setFilteredColleges(colleges);
   }, [colleges]);
 
   const handleSearch = async (filters: any) => {
+    console.log('Search initiated with filters:', filters);
     setSearchLoading(true);
     try {
       const results = await searchColleges(filters);
@@ -31,6 +35,7 @@ const Colleges = () => {
         description: `Found ${results.length} colleges matching your criteria`,
       });
     } catch (error) {
+      console.error('Search error:', error);
       toast({
         title: "Search completed",
         description: `Showing available colleges`,
@@ -42,10 +47,12 @@ const Colleges = () => {
   };
 
   const handleReset = () => {
+    console.log('Reset filters');
     setFilteredColleges(colleges);
   };
 
   const handleApply = (collegeId: string) => {
+    console.log('Apply clicked for college:', collegeId);
     toast({
       title: "Application Started",
       description: "Redirecting to application portal...",
@@ -53,6 +60,7 @@ const Colleges = () => {
   };
 
   const handleCompare = (college: any) => {
+    console.log('Compare clicked for college:', college.name);
     toast({
       title: "Added to Comparison",
       description: `${college.name} has been added to your comparison list`,
@@ -60,6 +68,7 @@ const Colleges = () => {
   };
 
   if (loading) {
+    console.log('Still loading colleges...');
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <Navigation />
@@ -72,6 +81,8 @@ const Colleges = () => {
       </div>
     );
   }
+
+  console.log('Rendering colleges page with', colleges.length, 'colleges and', entranceExams.length, 'exams');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
