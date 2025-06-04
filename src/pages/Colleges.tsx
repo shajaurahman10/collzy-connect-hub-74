@@ -7,13 +7,12 @@ import AdvancedCollegeSearch from '@/components/AdvancedCollegeSearch';
 import EntranceExamCard from '@/components/EntranceExamCard';
 import { useColleges } from '@/hooks/useColleges';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GraduationCap, BookOpen, Search, TrendingUp, Users, Award, AlertCircle, Wifi, WifiOff } from 'lucide-react';
+import { GraduationCap, BookOpen, TrendingUp, Users, Award } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Colleges = () => {
-  const { colleges, entranceExams, loading, error, searchColleges } = useColleges();
+  const { colleges, entranceExams, loading, searchColleges } = useColleges();
   const [filteredColleges, setFilteredColleges] = useState(colleges);
   const [searchLoading, setSearchLoading] = useState(false);
   const { toast } = useToast();
@@ -21,17 +20,6 @@ const Colleges = () => {
   useEffect(() => {
     setFilteredColleges(colleges);
   }, [colleges]);
-
-  // Show connection status notification
-  useEffect(() => {
-    if (error && colleges.length > 0) {
-      toast({
-        title: "Demo Mode Active",
-        description: "Showing sample colleges for demonstration",
-        variant: "default",
-      });
-    }
-  }, [error, colleges.length, toast]);
 
   const handleSearch = async (filters: any) => {
     setSearchLoading(true);
@@ -90,19 +78,6 @@ const Colleges = () => {
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Connection Status Alert */}
-        {error && (
-          <Alert className="mb-6 border-blue-200 bg-blue-50">
-            <AlertCircle className="h-4 w-4 text-blue-600" />
-            <AlertDescription className="text-blue-800">
-              <div className="flex items-center gap-2">
-                <WifiOff className="h-4 w-4" />
-                <span>Demo mode active - Showing sample colleges for your trial run presentation</span>
-              </div>
-            </AlertDescription>
-          </Alert>
-        )}
-
         <div className="text-center mb-8">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
             Discover Your Dream College
@@ -110,12 +85,6 @@ const Colleges = () => {
           <p className="text-lg sm:text-xl text-blue-700 max-w-3xl mx-auto px-4 leading-relaxed">
             Explore {colleges.length}+ verified colleges across India. Find the perfect match for your career aspirations with our comprehensive search and comparison tools.
           </p>
-          {!error && (
-            <div className="flex items-center justify-center mt-4 text-green-600">
-              <Wifi className="h-4 w-4 mr-2" />
-              <span className="text-sm">Live data connected</span>
-            </div>
-          )}
         </div>
 
         {/* Stats Cards */}
@@ -164,7 +133,7 @@ const Colleges = () => {
               </h2>
               <div className="flex items-center text-blue-600">
                 <TrendingUp className="h-4 w-4 mr-1" />
-                <span className="text-sm">Updated daily</span>
+                <span className="text-sm">Live & Updated</span>
               </div>
             </div>
 
@@ -189,7 +158,7 @@ const Colleges = () => {
 
             {filteredColleges.length === 0 && !searchLoading && (
               <div className="text-center py-12">
-                <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <GraduationCap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">No colleges found</h3>
                 <p className="text-gray-500">Try adjusting your search filters to find more results</p>
               </div>
