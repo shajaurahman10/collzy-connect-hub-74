@@ -321,7 +321,7 @@ export const privateColleges = [
     status: "approved"
   },
 
-  // Include South India Private Colleges
+  // Include all South India Private Colleges
   ...southIndiaPrivateColleges
 ];
 
