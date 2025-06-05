@@ -6,6 +6,7 @@ import { Star, MapPin, Users, Heart, Globe, Phone, FileText, Send } from 'lucide
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import StudentProfileDialog from './StudentProfileDialog';
 
 interface CollegeCardProps {
   college: {
@@ -61,80 +62,86 @@ const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
     }
   };
 
-  const checkStudentProfile = () => {
-    // Check if user has submitted Google Form - we'll use a flag in localStorage
-    const hasProfile = localStorage.getItem('collzy-profile-created');
-    return hasProfile === 'true';
-  };
-
-  const handleApplyClick = () => {
-    if (!checkStudentProfile()) {
-      toast({
-        title: "Create Profile First",
-        description: "Please create your profile to apply to colleges.",
-        variant: "destructive",
-      });
-      // Redirect to Google Form
-      localStorage.setItem('collzy-return-url', window.location.href);
-      window.open('https://forms.gle/Cp2G5Lm5sNFe8eJu6', '_blank');
-      return;
-    }
-
-    // Get profile data from localStorage (we'll assume it's stored after form submission)
-    const profileData = JSON.parse(localStorage.getItem('collzy-profile-data') || '{}');
-    const subject = `Admission Enquiry via Collzy`;
+  const handleProfileSubmit = (profileData: any) => {
+    const subject = `Admission Enquiry from ${profileData.name} via Collzy`;
     const body = `Dear ${college.name} Admissions Team,
 
-I'm interested in applying to your college. I came across your profile on Collzy and would like to know more about the admission process, eligibility, and important dates.
+I hope this email finds you well. I am ${profileData.name}, and I came across your esteemed institution through the Collzy platform. I am very interested in applying for admission and would like to request detailed information about your programs.
 
-My profile details:
-- Name: ${profileData.name || 'Not specified'}
-- Email: ${profileData.email || 'Not specified'}
-- Phone: ${profileData.phone || 'Not specified'}
-- State: ${profileData.state || 'Not specified'}
-- 12th Grade Marks: ${profileData.marks || 'Not specified'}
+My Profile Details:
+• Name: ${profileData.name}
+• Email: ${profileData.email}
+• Phone: ${profileData.phone || 'Not provided'}
+• Age: ${profileData.age || 'Not provided'}
+• State: ${profileData.state}
+• 12th Grade Marks: ${profileData.marks_percentage}%
+• Course Interest: ${profileData.course_interest}
 
-Kindly refer to my submitted details via this form: https://forms.gle/Cp2G5Lm5sNFe8eJu6
+I would be grateful if you could provide me with information about:
 
-Thank you!
-Regards,
-${profileData.name || 'Student'}
-Collzy.com`;
+📚 Course Details:
+- Available programs and specializations
+- Eligibility criteria and prerequisites
+- Duration and curriculum structure
+
+💰 Fee Structure:
+- Tuition fees (semester/annual)
+- Additional charges (lab, library, sports, etc.)
+- Payment schedule and scholarship opportunities
+
+📅 Admission Process:
+- Application deadlines and procedure
+- Entrance exams (if any)
+- Required documents and selection criteria
+
+🏠 Accommodation:
+- Hostel facilities and availability
+- Accommodation fees and room types
+
+🎯 Additional Information:
+- Campus facilities and infrastructure
+- Placement opportunities and statistics
+- Student life and extracurricular activities
+
+I am very enthusiastic about the prospect of joining your institution and would appreciate a prompt response. Please let me know if you need any additional information from my side.
+
+Thank you for your time and consideration.
+
+Best regards,
+${profileData.name}
+Email: ${profileData.email}
+Phone: ${profileData.phone || 'Not provided'}
+
+---
+This inquiry was sent through Collzy - India's leading college discovery platform.
+Visit: www.collzy.com`;
 
     if (college.email) {
       const mailtoLink = `mailto:${college.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       window.open(mailtoLink, '_self');
       
-      // Send to Google Sheets
-      submitToGoogleSheets(profileData, college);
-      
       toast({
-        title: "🎉 Application Sent Successfully!",
-        description: "Check your email frequently to connect with the college. Don't forget to share Collzy with friends!",
+        title: "🎉 Application Email Prepared!",
+        description: "Your email client has opened with a pre-filled admission inquiry. Please send the email to complete your application!",
         duration: 6000,
       });
     } else {
-      onApply();
+      toast({
+        title: "Contact Information Unavailable",
+        description: "Please visit the college website for admission details.",
+        variant: "destructive",
+      });
     }
   };
 
-  const submitToGoogleSheets = async (profile: any, college: any) => {
-    try {
-      const formData = new FormData();
-      formData.append('entry.123456789', profile.name || '');
-      formData.append('entry.987654321', profile.email || '');
-      formData.append('entry.456789123', profile.phone || '');
-      formData.append('entry.789123456', college.name);
-      formData.append('entry.321654987', college.state);
-      
-      await fetch('https://docs.google.com/forms/d/e/1FAIpQLSdCp2G5Lm5sNFe8eJu6/formResponse', {
-        method: 'POST',
-        mode: 'no-cors',
-        body: formData
-      });
-    } catch (error) {
-      console.log('Form submission completed');
+  const checkExistingProfile = () => {
+    const existingProfile = localStorage.getItem('student-profile');
+    if (existingProfile) {
+      const profileData = JSON.parse(existingProfile);
+      handleProfileSubmit(profileData);
+      return true;
     }
+    return false;
   };
 
   const handleCallClick = () => {
@@ -218,18 +225,21 @@ Collzy.com`;
       </CardContent>
 
       <CardFooter className="pt-0 px-4 sm:px-6 pb-4 sm:pb-6 mt-auto">
-        {/* 2x2 Grid for Buttons */}
         <div className="grid grid-cols-2 gap-3 w-full">
-          {/* Top Left - Apply Now (Green) */}
-          <Button 
-            onClick={handleApplyClick}
-            className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-md hover:shadow-lg h-14 hover:scale-105 text-sm font-semibold flex flex-col items-center justify-center p-2"
-          >
-            <Send className="h-4 w-4 mb-1" />
-            <span className="text-xs">Apply Now</span>
-          </Button>
+          <StudentProfileDialog onProfileSubmit={handleProfileSubmit}>
+            <Button 
+              onClick={() => {
+                if (!checkExistingProfile()) {
+                  // Dialog will open automatically
+                }
+              }}
+              className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-md hover:shadow-lg h-14 hover:scale-105 text-sm font-semibold flex flex-col items-center justify-center p-2"
+            >
+              <Send className="h-4 w-4 mb-1" />
+              <span className="text-xs">Apply Now</span>
+            </Button>
+          </StudentProfileDialog>
           
-          {/* Top Right - Website */}
           <Button 
             variant="outline" 
             onClick={handleWebsiteClick}
@@ -240,7 +250,6 @@ Collzy.com`;
             <span className="text-xs">Website</span>
           </Button>
           
-          {/* Bottom Left - Call */}
           <Button 
             variant="outline" 
             onClick={handleCallClick}
@@ -251,7 +260,6 @@ Collzy.com`;
             <span className="text-xs">Call</span>
           </Button>
           
-          {/* Bottom Right - More Info */}
           <Button 
             variant="outline" 
             onClick={handleMoreInfoClick}

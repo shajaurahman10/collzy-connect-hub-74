@@ -345,6 +345,45 @@ export type Database = {
           },
         ]
       }
+      student_profiles: {
+        Row: {
+          age: number | null
+          course_interest: string | null
+          created_at: string | null
+          email: string
+          id: string
+          marks_percentage: number | null
+          name: string
+          phone: string | null
+          state: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          age?: number | null
+          course_interest?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          marks_percentage?: number | null
+          name: string
+          phone?: string | null
+          state?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          age?: number | null
+          course_interest?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          marks_percentage?: number | null
+          name?: string
+          phone?: string | null
+          state?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
