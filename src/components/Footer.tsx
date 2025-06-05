@@ -1,5 +1,6 @@
 
 import { MapPin, Mail, Phone, MessageCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -36,10 +37,10 @@ const Footer = () => {
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-blue-400">Quick Links</h4>
             <ul className="space-y-2">
-              <li><a href="/colleges" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">All Colleges</a></li>
-              <li><a href="/private-colleges" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Private Colleges</a></li>
-              <li><a href="/rankings" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">College Rankings</a></li>
-              <li><a href="/submit-college" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Submit College</a></li>
+              <li><Link to="/colleges" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">All Colleges</Link></li>
+              <li><Link to="/private-colleges" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Private Colleges</Link></li>
+              <li><Link to="/rankings" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">College Rankings</Link></li>
+              <li><Link to="/submit-college" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Submit College</Link></li>
             </ul>
           </div>
 
@@ -47,10 +48,10 @@ const Footer = () => {
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-blue-400">Services</h4>
             <ul className="space-y-2">
-              <li><a href="/tracker" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Admission Tracker</a></li>
-              <li><a href="/create-profile" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Student Profile</a></li>
-              <li><a href="/help-center" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Help Center</a></li>
-              <li><a href="/contact" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Contact Us</a></li>
+              <li><Link to="/tracker" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Admission Tracker</Link></li>
+              <li><Link to="/create-profile" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Student Profile</Link></li>
+              <li><Link to="/help-center" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Help Center</Link></li>
+              <li><Link to="/contact" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Contact Us</Link></li>
             </ul>
           </div>
 
@@ -58,10 +59,10 @@ const Footer = () => {
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-blue-400">Legal</h4>
             <ul className="space-y-2">
-              <li><a href="/privacy-policy" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Privacy Policy</a></li>
-              <li><a href="/about" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">About Us</a></li>
-              <li><a href="/careers" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Careers</a></li>
-              <li><a href="/blog" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Blog</a></li>
+              <li><Link to="/privacy-policy" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Privacy Policy</Link></li>
+              <li><Link to="/about" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">About Us</Link></li>
+              <li><Link to="/careers" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Careers</Link></li>
+              <li><Link to="/blog" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">Blog</Link></li>
             </ul>
           </div>
         </div>
