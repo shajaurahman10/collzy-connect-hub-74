@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -62,6 +63,15 @@ const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
   };
 
   const handleProfileSubmit = (profileData: any) => {
+    if (!college.email) {
+      toast({
+        title: "Email Not Available",
+        description: "This college doesn't have an email address available. Please try calling or visiting their website.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const subject = `Admission Enquiry from ${profileData.name} via Collzy`;
     const body = `Dear ${college.name} Admissions Team,
 
@@ -116,19 +126,20 @@ This inquiry was sent through Collzy - India's leading college discovery platfor
 Contact us: collzy.info@gmail.com | WhatsApp: +91 8129913205
 Location: Kasargod, Kerala`;
 
-    if (college.email) {
-      const mailtoLink = `mailto:${college.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      window.open(mailtoLink, '_self');
+    const mailtoLink = `mailto:${college.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    
+    try {
+      window.location.href = mailtoLink;
       
       toast({
-        title: "🎉 Application Email Prepared!",
-        description: "Your email client has opened with a pre-filled admission inquiry. Please send the email to complete your application!",
+        title: "🎉 Application Email Opened!",
+        description: "Your email application has been prepared. Please send the email to complete your application!",
         duration: 6000,
       });
-    } else {
+    } catch (error) {
       toast({
-        title: "Contact Information Unavailable",
-        description: "Please visit the college website for admission details.",
+        title: "Error Opening Email",
+        description: "Please copy the college email and send manually: " + college.email,
         variant: "destructive",
       });
     }
@@ -146,11 +157,19 @@ Location: Kasargod, Kerala`;
 
   const handleCallClick = () => {
     if (college.phone) {
-      window.open(`tel:${college.phone}`, '_self');
-      toast({
-        title: "Opening Phone App",
-        description: `Calling ${college.name}...`,
-      });
+      try {
+        window.location.href = `tel:${college.phone}`;
+        toast({
+          title: "Opening Phone App",
+          description: `Calling ${college.name}...`,
+        });
+      } catch (error) {
+        toast({
+          title: "Phone App Error",
+          description: `Please call manually: ${college.phone}`,
+          variant: "destructive",
+        });
+      }
     } else {
       toast({
         title: "Phone Number Unavailable",
@@ -162,8 +181,20 @@ Location: Kasargod, Kerala`;
 
   const handleWebsiteClick = () => {
     if (college.website) {
-      const url = college.website.startsWith('http') ? college.website : `https://${college.website}`;
-      window.open(url, '_blank');
+      try {
+        const url = college.website.startsWith('http') ? college.website : `https://${college.website}`;
+        window.open(url, '_blank');
+        toast({
+          title: "Opening Website",
+          description: "College website is opening in a new tab.",
+        });
+      } catch (error) {
+        toast({
+          title: "Website Error",
+          description: "Please visit the website manually: " + college.website,
+          variant: "destructive",
+        });
+      }
     } else {
       toast({
         title: "Website Unavailable",
@@ -195,13 +226,21 @@ Collzy User
 This inquiry was sent through Collzy - India's leading college discovery platform.
 Visit: www.collzy.com`;
 
-      const mailtoLink = `mailto:${college.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      window.open(mailtoLink, '_self');
-      
-      toast({
-        title: "Opening Email Client",
-        description: "Email client opened with pre-filled inquiry.",
-      });
+      try {
+        const mailtoLink = `mailto:${college.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.location.href = mailtoLink;
+        
+        toast({
+          title: "Opening Email Client",
+          description: "Email client opened with pre-filled inquiry.",
+        });
+      } catch (error) {
+        toast({
+          title: "Email Error",
+          description: `Please email manually: ${college.email}`,
+          variant: "destructive",
+        });
+      }
     } else {
       toast({
         title: "Email Unavailable",
