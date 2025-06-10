@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { privateColleges } from '@/data/privateColleges';
 
 interface College {
   id: string;
@@ -59,8 +60,39 @@ interface EntranceExam {
   created_at: string;
 }
 
-// Guaranteed working data for production deployment
-const guaranteedColleges: College[] = [
+// Convert private college data to match College interface
+const convertPrivateCollegeData = (privateCollegeData: any[]): College[] => {
+  return privateCollegeData.map(college => ({
+    id: college.id,
+    name: college.name,
+    city: college.city,
+    state: college.state,
+    type: college.type,
+    established_year: college.established_year,
+    affiliation: college.affiliation,
+    naac_grade: college.naac_grade,
+    website: college.website,
+    admission_email: college.admission_email,
+    phone: college.phone,
+    courses_offered: college.courses_offered,
+    total_fees: college.total_fees,
+    hostel_available: college.hostel_available,
+    placement_percentage: college.placement_percentage,
+    average_package: college.average_package,
+    highest_package: college.highest_package,
+    student_strength: college.student_strength,
+    status: 'active',
+    featured: false,
+    created_at: college.created_at,
+    updated_at: college.created_at
+  }));
+};
+
+// Convert all private colleges data
+const allPrivateColleges = convertPrivateCollegeData(privateColleges);
+
+// Additional guaranteed colleges for diversity
+const additionalColleges: College[] = [
   {
     id: 'iit-madras-1',
     name: 'Indian Institute of Technology Madras',
@@ -120,157 +152,6 @@ const guaranteedColleges: College[] = [
     library_books: 400000,
     status: 'active',
     featured: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: 'iit-bombay-3',
-    name: 'Indian Institute of Technology Bombay',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    type: 'Government',
-    established_year: 1958,
-    affiliation: 'Autonomous',
-    naac_grade: 'A++',
-    nirf_ranking: 3,
-    website: 'https://iitb.ac.in',
-    admission_email: 'admissions@iitb.ac.in',
-    phone: '+91-22-2572-2545',
-    address: 'Powai, Mumbai - 400076',
-    courses_offered: ['B.Tech Aerospace', 'B.Tech Computer Science', 'B.Tech Metallurgy', 'M.Tech', 'PhD'],
-    total_fees: 200000,
-    hostel_available: true,
-    placement_percentage: 95,
-    average_package: 1800000,
-    highest_package: 4500000,
-    accreditations: ['NAAC A++', 'NBA Accredited'],
-    facilities: ['Research Parks', 'Innovation Labs', 'Library', 'Hostels', 'Sports Complex'],
-    campus_size: '550 acres',
-    student_strength: 9000,
-    faculty_count: 580,
-    library_books: 450000,
-    status: 'active',
-    featured: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: 'christ-university-4',
-    name: 'Christ University',
-    city: 'Bangalore',
-    state: 'Karnataka',
-    type: 'Private',
-    established_year: 1969,
-    affiliation: 'Deemed University',
-    naac_grade: 'A++',
-    website: 'https://christuniversity.in',
-    admission_email: 'admissions@christuniversity.in',
-    phone: '+91-80-4012-9100',
-    address: 'Hosur Road, Bangalore - 560029',
-    courses_offered: ['B.A', 'B.Sc', 'B.Com', 'BBA', 'B.Tech', 'MBA', 'MCA'],
-    total_fees: 180000,
-    hostel_available: true,
-    placement_percentage: 90,
-    average_package: 800000,
-    highest_package: 2500000,
-    accreditations: ['NAAC A++', 'UGC Recognition'],
-    facilities: ['Modern Campus', 'Central Library', 'Hostels', 'Sports Facilities', 'Auditorium'],
-    campus_size: '100 acres',
-    student_strength: 20000,
-    faculty_count: 1200,
-    library_books: 300000,
-    status: 'active',
-    featured: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: 'vit-vellore-5',
-    name: 'Vellore Institute of Technology',
-    city: 'Vellore',
-    state: 'Tamil Nadu',
-    type: 'Private',
-    established_year: 1984,
-    affiliation: 'Deemed University',
-    naac_grade: 'A++',
-    website: 'https://vit.ac.in',
-    admission_email: 'admissions@vit.ac.in',
-    phone: '+91-416-220-2020',
-    address: 'Tiruvalam Road, Katpadi, Vellore - 632014',
-    courses_offered: ['B.Tech Computer Science', 'B.Tech Electronics', 'B.Tech Mechanical', 'M.Tech', 'MBA'],
-    total_fees: 195000,
-    hostel_available: true,
-    placement_percentage: 95,
-    average_package: 1500000,
-    highest_package: 4000000,
-    accreditations: ['NAAC A++', 'NBA Accredited'],
-    facilities: ['Technology Park', 'Research Centers', 'Library', 'Hostels', 'Innovation Labs'],
-    campus_size: '350 acres',
-    student_strength: 25000,
-    faculty_count: 1500,
-    library_books: 400000,
-    status: 'active',
-    featured: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: 'kmct-kozhikode-6',
-    name: 'KMCT College of Engineering',
-    city: 'Kozhikode',
-    state: 'Kerala',
-    type: 'Private',
-    established_year: 2001,
-    affiliation: 'APJ Abdul Kalam Technological University',
-    naac_grade: 'A+',
-    website: 'https://kmct.edu.in',
-    admission_email: 'admissions@kmct.edu.in',
-    phone: '+91-495-2285400',
-    address: 'Manassery, Mukkam, Kozhikode - 673601',
-    courses_offered: ['B.Tech Computer Science', 'B.Tech Electronics', 'B.Tech Mechanical', 'B.Tech Civil', 'M.Tech'],
-    total_fees: 135000,
-    hostel_available: true,
-    placement_percentage: 92,
-    average_package: 1100000,
-    highest_package: 3200000,
-    accreditations: ['NAAC A+', 'NBA Accredited', 'AICTE Approved'],
-    facilities: ['Advanced Labs', 'Central Library', 'Hostels', 'Innovation Center', 'Seminar Halls'],
-    campus_size: '35 acres',
-    student_strength: 2800,
-    faculty_count: 200,
-    library_books: 100000,
-    status: 'active',
-    featured: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: 'geck-kozhikode-7',
-    name: 'Government Engineering College Kozhikode',
-    city: 'Kozhikode',
-    state: 'Kerala',
-    type: 'Government',
-    established_year: 2008,
-    affiliation: 'APJ Abdul Kalam Technological University',
-    naac_grade: 'A+',
-    website: 'https://geck.ac.in',
-    admission_email: 'principal@geck.ac.in',
-    phone: '+91-495-2287650',
-    address: 'West Hill P.O, Kozhikode - 673005',
-    courses_offered: ['B.Tech Computer Science', 'B.Tech Electronics', 'B.Tech Mechanical', 'B.Tech Civil', 'M.Tech'],
-    total_fees: 45000,
-    hostel_available: true,
-    placement_percentage: 95,
-    average_package: 1200000,
-    highest_package: 3500000,
-    accreditations: ['NAAC A+', 'AICTE Approved', 'NBA Accredited'],
-    facilities: ['Research Labs', 'Central Library', 'Hostels', 'Innovation Labs', 'Workshops'],
-    campus_size: '40 acres',
-    student_strength: 2000,
-    faculty_count: 150,
-    library_books: 80000,
-    status: 'active',
-    featured: false,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   },
@@ -395,12 +276,14 @@ export const useColleges = () => {
   useEffect(() => {
     console.log('useColleges hook initializing...');
     
-    // Immediately set guaranteed data to ensure the page always works
-    setColleges(guaranteedColleges);
+    // Combine all private colleges with additional colleges
+    const allColleges = [...allPrivateColleges, ...additionalColleges];
+    
+    setColleges(allColleges);
     setEntranceExams(guaranteedEntranceExams);
     setLoading(false);
     
-    console.log('Set guaranteed data:', guaranteedColleges.length, 'colleges,', guaranteedEntranceExams.length, 'exams');
+    console.log('Set college data:', allColleges.length, 'colleges,', guaranteedEntranceExams.length, 'exams');
     
     // Try to fetch additional data in background without affecting the UI
     fetchAdditionalData();
@@ -493,7 +376,8 @@ export const useColleges = () => {
   const refetch = () => {
     console.log('Refetching data...');
     setLoading(true);
-    setColleges(guaranteedColleges);
+    const allColleges = [...allPrivateColleges, ...additionalColleges];
+    setColleges(allColleges);
     setEntranceExams(guaranteedEntranceExams);
     setLoading(false);
     fetchAdditionalData();
