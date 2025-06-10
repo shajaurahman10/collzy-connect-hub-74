@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { privateColleges } from '@/data/privateColleges';
@@ -88,7 +87,7 @@ const convertPrivateCollegeData = (privateCollegeData: any[]): College[] => {
   }));
 };
 
-// Convert all private colleges data
+// Convert all private colleges data - make sure we get ALL of them
 const allPrivateColleges = convertPrivateCollegeData(privateColleges);
 
 // Additional guaranteed colleges for diversity
@@ -276,8 +275,11 @@ export const useColleges = () => {
   useEffect(() => {
     console.log('useColleges hook initializing...');
     
-    // Combine all private colleges with additional colleges
+    // Ensure we're getting ALL private colleges plus additional guaranteed ones
     const allColleges = [...allPrivateColleges, ...additionalColleges];
+    
+    console.log('Total private colleges loaded:', allPrivateColleges.length);
+    console.log('Total colleges (with additional):', allColleges.length);
     
     setColleges(allColleges);
     setEntranceExams(guaranteedEntranceExams);
