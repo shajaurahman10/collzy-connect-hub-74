@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -110,15 +109,22 @@ This inquiry was sent through Collzy - India's leading college discovery platfor
 Contact us: collzy.info@gmail.com | WhatsApp: +91 8129913205
 Location: Kasargod, Kerala`;
 
-    // Open email client with pre-filled message
-    const mailtoUrl = `mailto:${college.admission_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(mailtoUrl, '_self');
+    if (college.admission_email) {
+      const mailtoUrl = `mailto:${college.admission_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(mailtoUrl, '_self');
 
-    toast({
-      title: "🎉 Application initiated successfully!",
-      description: "Your email client has opened with a pre-filled message. Please send the email to complete your application!",
-      duration: 6000,
-    });
+      toast({
+        title: "🎉 Application initiated successfully!",
+        description: "Your email client has opened with a pre-filled message. Please send the email to complete your application!",
+        duration: 6000,
+      });
+    } else {
+      toast({
+        title: "Contact Information Unavailable",
+        description: "Please visit the college website for admission details.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleFavorite = () => {
@@ -129,18 +135,73 @@ Location: Kasargod, Kerala`;
 
   const handleWebsite = () => {
     if (college.website) {
-      window.open(college.website, '_blank');
+      const url = college.website.startsWith('http') ? college.website : `https://${college.website}`;
+      window.open(url, '_blank');
+      toast({
+        title: "Opening Website",
+        description: "College website is opening in a new tab.",
+      });
+    } else {
+      toast({
+        title: "Website Unavailable",
+        description: "No website link available for this college.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleCall = () => {
     if (college.phone) {
       window.open(`tel:${college.phone}`, '_self');
+      toast({
+        title: "Opening Phone App",
+        description: `Calling ${college.name}...`,
+      });
+    } else {
+      toast({
+        title: "Phone Number Unavailable",
+        description: "Please visit the college website for contact details.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleEmail = () => {
-    window.open(`mailto:${college.admission_email}`, '_self');
+    if (college.admission_email) {
+      const subject = `Enquiry from Collzy Platform`;
+      const body = `Dear ${college.name} Team,
+
+I found your college through Collzy platform and would like to know more about your programs and admission process.
+
+Please provide information about:
+- Available courses and eligibility
+- Fee structure and scholarships
+- Admission deadlines
+- Campus facilities
+
+Thank you for your time.
+
+Best regards,
+Collzy User
+
+---
+This inquiry was sent through Collzy - India's leading college discovery platform.
+Visit: www.collzy.com`;
+
+      const mailtoUrl = `mailto:${college.admission_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(mailtoUrl, '_self');
+      
+      toast({
+        title: "Opening Email Client",
+        description: "Email client opened with pre-filled inquiry.",
+      });
+    } else {
+      toast({
+        title: "Email Unavailable",
+        description: "No email address available for this college.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getGradeColor = (grade?: string) => {

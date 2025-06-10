@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -114,7 +113,8 @@ Phone: ${profileData.phone || 'Not provided'}
 
 ---
 This inquiry was sent through Collzy - India's leading college discovery platform.
-Visit: www.collzy.com`;
+Contact us: collzy.info@gmail.com | WhatsApp: +91 8129913205
+Location: Kasargod, Kerala`;
 
     if (college.email) {
       const mailtoLink = `mailto:${college.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -147,20 +147,90 @@ Visit: www.collzy.com`;
   const handleCallClick = () => {
     if (college.phone) {
       window.open(`tel:${college.phone}`, '_self');
+      toast({
+        title: "Opening Phone App",
+        description: `Calling ${college.name}...`,
+      });
+    } else {
+      toast({
+        title: "Phone Number Unavailable",
+        description: "Please visit the college website for contact details.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleWebsiteClick = () => {
     if (college.website) {
-      window.open(college.website.startsWith('http') ? college.website : `https://${college.website}`, '_blank');
+      const url = college.website.startsWith('http') ? college.website : `https://${college.website}`;
+      window.open(url, '_blank');
+    } else {
+      toast({
+        title: "Website Unavailable",
+        description: "No website link available for this college.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEmailClick = () => {
+    if (college.email) {
+      const subject = `Enquiry from Collzy Platform`;
+      const body = `Dear ${college.name} Team,
+
+I found your college through Collzy platform and would like to know more about your programs and admission process.
+
+Please provide information about:
+- Available courses and eligibility
+- Fee structure and scholarships
+- Admission deadlines
+- Campus facilities
+
+Thank you for your time.
+
+Best regards,
+Collzy User
+
+---
+This inquiry was sent through Collzy - India's leading college discovery platform.
+Visit: www.collzy.com`;
+
+      const mailtoLink = `mailto:${college.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(mailtoLink, '_self');
+      
+      toast({
+        title: "Opening Email Client",
+        description: "Email client opened with pre-filled inquiry.",
+      });
+    } else {
+      toast({
+        title: "Email Unavailable",
+        description: "No email address available for this college.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleMoreInfoClick = () => {
     if (college.brochure) {
       window.open(college.brochure, '_blank');
+      toast({
+        title: "Opening Brochure",
+        description: "College brochure is opening in a new tab.",
+      });
     } else if (college.website) {
-      window.open(college.website.startsWith('http') ? college.website : `https://${college.website}`, '_blank');
+      const url = college.website.startsWith('http') ? college.website : `https://${college.website}`;
+      window.open(url, '_blank');
+      toast({
+        title: "Opening Website",
+        description: "College website is opening in a new tab.",
+      });
+    } else {
+      toast({
+        title: "Information Unavailable",
+        description: "No additional information available.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -243,7 +313,6 @@ Visit: www.collzy.com`;
           <Button 
             variant="outline" 
             onClick={handleWebsiteClick}
-            disabled={!college.website}
             className="h-14 border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-sm hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center p-2"
           >
             <Globe className="h-4 w-4 mb-1" />
@@ -253,7 +322,6 @@ Visit: www.collzy.com`;
           <Button 
             variant="outline" 
             onClick={handleCallClick}
-            disabled={!college.phone}
             className="h-14 border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-sm hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center p-2"
           >
             <Phone className="h-4 w-4 mb-1" />
@@ -262,12 +330,11 @@ Visit: www.collzy.com`;
           
           <Button 
             variant="outline" 
-            onClick={handleMoreInfoClick}
-            disabled={!college.brochure && !college.website}
+            onClick={handleEmailClick}
             className="h-14 border-gray-200 hover:border-orange-300 hover:bg-orange-50 text-sm hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center p-2"
           >
             <FileText className="h-4 w-4 mb-1" />
-            <span className="text-xs">More Info</span>
+            <span className="text-xs">Email</span>
           </Button>
         </div>
       </CardFooter>
