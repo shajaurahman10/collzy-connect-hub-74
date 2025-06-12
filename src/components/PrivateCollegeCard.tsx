@@ -33,6 +33,10 @@ const PrivateCollegeCard = ({ college, onFavorite }: PrivateCollegeCardProps) =>
   const { toast } = useToast();
 
   const handleApply = () => {
+    console.log('Apply button clicked for:', college.name);
+    console.log('User:', user);
+    console.log('Profile:', profile);
+
     if (!user) {
       toast({
         title: "Please log in",
@@ -62,7 +66,20 @@ const PrivateCollegeCard = ({ college, onFavorite }: PrivateCollegeCardProps) =>
       return;
     }
 
-    // Generate pre-filled email message
+    // Store application attempt in localStorage for tracking
+    const applicationData = {
+      collegeId: college.id,
+      collegeName: college.name,
+      appliedAt: new Date().toISOString(),
+      userEmail: profile.email,
+      status: 'applied'
+    };
+    
+    const existingApplications = JSON.parse(localStorage.getItem('college_applications') || '[]');
+    existingApplications.push(applicationData);
+    localStorage.setItem('college_applications', JSON.stringify(existingApplications));
+
+    // Generate pre-filled email message with profile data
     const subject = `Admission Enquiry from ${profile.full_name} via Collzy`;
     const body = `Dear ${college.name} Admissions Team,
 
@@ -71,10 +88,10 @@ I hope this email finds you well. I am ${profile.full_name}, and I came across y
 My Profile Details:
 • Name: ${profile.full_name}
 • Email: ${profile.email}
-• Phone: ${profile.phone}
-• State: ${profile.state}
-• 12th Grade Marks: ${profile.marks}
-• Course Interest: ${profile.course_interest}
+• Phone: ${profile.phone || 'Not provided'}
+• State: ${profile.state || 'Not provided'}
+• 12th Grade Marks: ${profile.marks || 'Not provided'}
+• Course Interest: ${profile.course_interest || 'Not provided'}
 
 I would be grateful if you could provide me with information about:
 
@@ -111,7 +128,7 @@ Thank you for your time and consideration.
 Best regards,
 ${profile.full_name}
 Email: ${profile.email}
-Phone: ${profile.phone}
+Phone: ${profile.phone || 'Not provided'}
 
 ---
 This inquiry was sent through Collzy - India's leading college discovery platform.
@@ -122,12 +139,16 @@ Location: Kasargod, Kerala`;
       const mailtoUrl = `mailto:${college.admission_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       window.location.href = mailtoUrl;
 
+      // Store successful email attempt
+      document.cookie = `last_application=${college.name}; max-age=${60*60*24*7}; path=/`;
+      
       toast({
         title: "🎉 Application email opened!",
         description: "Your email client has opened with a pre-filled message. Please send the email to complete your application!",
         duration: 6000,
       });
     } catch (error) {
+      console.error('Error opening email:', error);
       toast({
         title: "Error Opening Email",
         description: "Please copy the college email and send manually: " + college.admission_email,
@@ -140,6 +161,21 @@ Location: Kasargod, Kerala`;
     const newFavoriteState = !isFavorited;
     setIsFavorited(newFavoriteState);
     onFavorite?.(college.id, newFavoriteState);
+    
+    // Store favorites in localStorage with expiry
+    const favorites = JSON.parse(localStorage.getItem('favorite_colleges') || '[]');
+    if (newFavoriteState) {
+      favorites.push({
+        collegeId: college.id,
+        collegeName: college.name,
+        addedAt: new Date().toISOString()
+      });
+    } else {
+      const index = favorites.findIndex((fav: any) => fav.collegeId === college.id);
+      if (index > -1) favorites.splice(index, 1);
+    }
+    localStorage.setItem('favorite_colleges', JSON.stringify(favorites));
+    document.cookie = `favorite_count=${favorites.length}; max-age=${60*60*24*365}; path=/`;
   };
 
   const handleWebsite = () => {
@@ -147,6 +183,16 @@ Location: Kasargod, Kerala`;
       try {
         const url = college.website.startsWith('http') ? college.website : `https://${college.website}`;
         window.open(url, '_blank');
+        
+        // Track website visits
+        const visits = JSON.parse(localStorage.getItem('website_visits') || '[]');
+        visits.push({
+          collegeId: college.id,
+          collegeName: college.name,
+          visitedAt: new Date().toISOString()
+        });
+        localStorage.setItem('website_visits', JSON.stringify(visits));
+        
         toast({
           title: "Opening Website",
           description: "College website is opening in a new tab.",
@@ -171,6 +217,16 @@ Location: Kasargod, Kerala`;
     if (college.phone) {
       try {
         window.location.href = `tel:${college.phone}`;
+        
+        // Track call attempts
+        const calls = JSON.parse(localStorage.getItem('call_attempts') || '[]');
+        calls.push({
+          collegeId: college.id,
+          collegeName: college.name,
+          calledAt: new Date().toISOString()
+        });
+        localStorage.setItem('call_attempts', JSON.stringify(calls));
+        
         toast({
           title: "Opening Phone App",
           description: `Calling ${college.name}...`,

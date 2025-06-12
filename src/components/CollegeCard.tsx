@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,7 +5,8 @@ import { Star, MapPin, Users, Heart, Globe, Phone, FileText, Send } from 'lucide
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import StudentProfileDialog from './StudentProfileDialog';
+import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
 
 interface CollegeCardProps {
   college: {
@@ -34,6 +34,8 @@ const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { profile } = useProfile();
 
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem('favoriteColleges') || '[]');
@@ -62,7 +64,31 @@ const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
     }
   };
 
-  const handleProfileSubmit = (profileData: any) => {
+  const handleApplyClick = () => {
+    console.log('Apply button clicked for:', college.name);
+    console.log('User:', user);
+    console.log('Profile:', profile);
+
+    if (!user) {
+      toast({
+        title: "Please log in",
+        description: "You need to log in to apply to colleges.",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+
+    if (!profile) {
+      toast({
+        title: "Complete your profile",
+        description: "Please complete your profile before applying to colleges.",
+        variant: "destructive",
+      });
+      navigate('/create-profile');
+      return;
+    }
+
     if (!college.email) {
       toast({
         title: "Email Not Available",
@@ -72,19 +98,19 @@ const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
       return;
     }
 
-    const subject = `Admission Enquiry from ${profileData.name} via Collzy`;
+    // Generate application email with profile data
+    const subject = `Admission Enquiry from ${profile.full_name} via Collzy`;
     const body = `Dear ${college.name} Admissions Team,
 
-I hope this email finds you well. I am ${profileData.name}, and I came across your esteemed institution through the Collzy platform. I am very interested in applying for admission and would like to request detailed information about your programs.
+I hope this email finds you well. I am ${profile.full_name}, and I came across your esteemed institution through the Collzy platform. I am very interested in applying for admission and would like to request detailed information about your programs.
 
 My Profile Details:
-• Name: ${profileData.name}
-• Email: ${profileData.email}
-• Phone: ${profileData.phone || 'Not provided'}
-• Age: ${profileData.age || 'Not provided'}
-• State: ${profileData.state}
-• 12th Grade Marks: ${profileData.marks_percentage}%
-• Course Interest: ${profileData.course_interest}
+• Name: ${profile.full_name}
+• Email: ${profile.email}
+• Phone: ${profile.phone || 'Not provided'}
+• State: ${profile.state || 'Not provided'}
+• 12th Grade Marks: ${profile.marks || 'Not provided'}
+• Course Interest: ${profile.course_interest || 'Not provided'}
 
 I would be grateful if you could provide me with information about:
 
@@ -117,19 +143,29 @@ I am very enthusiastic about the prospect of joining your institution and would 
 Thank you for your time and consideration.
 
 Best regards,
-${profileData.name}
-Email: ${profileData.email}
-Phone: ${profileData.phone || 'Not provided'}
+${profile.full_name}
+Email: ${profile.email}
+Phone: ${profile.phone || 'Not provided'}
 
 ---
 This inquiry was sent through Collzy - India's leading college discovery platform.
 Contact us: collzy.info@gmail.com | WhatsApp: +91 8129913205
 Location: Kasargod, Kerala`;
 
-    const mailtoLink = `mailto:${college.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    
     try {
+      const mailtoLink = `mailto:${college.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       window.location.href = mailtoLink;
+      
+      // Store application attempt
+      const applications = JSON.parse(localStorage.getItem('college_applications') || '[]');
+      applications.push({
+        collegeId: college.id,
+        collegeName: college.name,
+        appliedAt: new Date().toISOString(),
+        userEmail: profile.email,
+        status: 'applied'
+      });
+      localStorage.setItem('college_applications', JSON.stringify(applications));
       
       toast({
         title: "🎉 Application Email Opened!",
@@ -143,16 +179,6 @@ Location: Kasargod, Kerala`;
         variant: "destructive",
       });
     }
-  };
-
-  const checkExistingProfile = () => {
-    const existingProfile = localStorage.getItem('student-profile');
-    if (existingProfile) {
-      const profileData = JSON.parse(existingProfile);
-      handleProfileSubmit(profileData);
-      return true;
-    }
-    return false;
   };
 
   const handleCallClick = () => {
@@ -335,19 +361,13 @@ Visit: www.collzy.com`;
 
       <CardFooter className="pt-0 px-4 sm:px-6 pb-4 sm:pb-6 mt-auto">
         <div className="grid grid-cols-2 gap-3 w-full">
-          <StudentProfileDialog onProfileSubmit={handleProfileSubmit}>
-            <Button 
-              onClick={() => {
-                if (!checkExistingProfile()) {
-                  // Dialog will open automatically
-                }
-              }}
-              className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-md hover:shadow-lg h-14 hover:scale-105 text-sm font-semibold flex flex-col items-center justify-center p-2"
-            >
-              <Send className="h-4 w-4 mb-1" />
-              <span className="text-xs">Apply Now</span>
-            </Button>
-          </StudentProfileDialog>
+          <Button 
+            onClick={handleApplyClick}
+            className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-md hover:shadow-lg h-14 hover:scale-105 text-sm font-semibold flex flex-col items-center justify-center p-2"
+          >
+            <Send className="h-4 w-4 mb-1" />
+            <span className="text-xs">Apply Now</span>
+          </Button>
           
           <Button 
             variant="outline" 

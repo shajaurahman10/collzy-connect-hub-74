@@ -21,18 +21,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Configure Supabase client for better session persistence
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Store user session in localStorage for persistence
+        if (session) {
+          localStorage.setItem('supabase_session', JSON.stringify({
+            user: session.user,
+            access_token: session.access_token,
+            refresh_token: session.refresh_token,
+            expires_at: session.expires_at
+          }));
+          
+          // Store basic user info in cookies for quick access
+          document.cookie = `user_email=${session.user.email}; max-age=${60*60*24*365}; path=/`;
+          document.cookie = `user_id=${session.user.id}; max-age=${60*60*24*365}; path=/`;
+        } else {
+          localStorage.removeItem('supabase_session');
+          // Clear cookies
+          document.cookie = 'user_email=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+          document.cookie = 'user_id=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+        }
       }
     );
 
+    // Check for existing session on app load
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      if (session) {
+        // Store session data
+        localStorage.setItem('supabase_session', JSON.stringify({
+          user: session.user,
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+          expires_at: session.expires_at
+        }));
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -60,6 +92,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+      },
     });
     if (error) throw error;
   };
@@ -67,6 +102,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+    
+    // Clear all stored data
+    localStorage.removeItem('supabase_session');
+    localStorage.removeItem('user_profile');
+    localStorage.removeItem('application_preferences');
+    document.cookie = 'user_email=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+    document.cookie = 'user_id=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
   };
 
   return (
