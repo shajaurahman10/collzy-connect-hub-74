@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -65,9 +65,9 @@ const Auth = () => {
         await signUpWithEmail(email, password);
         toast({
           title: "Account created successfully!",
-          description: "Please check your email to verify your account before signing in.",
+          description: "You can now sign in with your credentials. Email confirmation is disabled for easier testing.",
         });
-        setIsLogin(true); // Switch to login mode after successful signup
+        setIsLogin(true);
         setPassword('');
         setConfirmPassword('');
       }
@@ -82,9 +82,11 @@ const Auth = () => {
         errorMessage = "An account with this email already exists. Please sign in instead.";
         setIsLogin(true);
       } else if (error.message?.includes('Email not confirmed')) {
-        errorMessage = "Please check your email and click the verification link before signing in.";
+        errorMessage = "Please check your email and click the verification link, or try signing in directly as email confirmation might be disabled.";
       } else if (error.message?.includes('Invalid email')) {
         errorMessage = "Please enter a valid email address.";
+      } else if (error.message?.includes('Signup requires a valid password')) {
+        errorMessage = "Please enter a valid password (minimum 6 characters).";
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -104,14 +106,14 @@ const Auth = () => {
     try {
       await signInWithGoogle();
       toast({
-        title: "Success!",
-        description: "You have successfully signed in with Google.",
+        title: "Redirecting to Google",
+        description: "Please complete the sign-in process in the popup window.",
       });
     } catch (error: any) {
       console.error('Google auth error:', error);
       toast({
         title: "Google Sign-in Error",
-        description: error.message || "An error occurred during Google sign-in.",
+        description: error.message || "Failed to initialize Google sign-in. Please check your internet connection and try again.",
         variant: "destructive",
       });
       setLoading(false);
@@ -146,7 +148,7 @@ const Auth = () => {
                 <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              Continue with Google
+              {loading ? 'Please wait...' : 'Continue with Google'}
             </Button>
             
             <div className="relative">
@@ -239,6 +241,10 @@ const Auth = () => {
                 By creating an account, you agree to our Terms of Service and Privacy Policy.
               </div>
             )}
+
+            <div className="text-xs text-gray-600 bg-blue-50 p-3 rounded-lg">
+              <strong>Note:</strong> If you're having trouble signing in, try creating a new account first, then use those same credentials to sign in. Email confirmation is disabled for easier testing.
+            </div>
           </CardContent>
         </Card>
       </div>
