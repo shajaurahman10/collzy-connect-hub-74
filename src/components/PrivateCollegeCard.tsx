@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { MapPin, Globe, Phone, Heart, Mail, Award, ExternalLink } from 'lucide-r
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
+import { generateApplicationEmail, openGmailCompose, openDefaultEmail } from '@/utils/emailService';
 
 interface College {
   id: string;
@@ -34,8 +36,6 @@ const PrivateCollegeCard = ({ college, onFavorite }: PrivateCollegeCardProps) =>
 
   const handleApply = () => {
     console.log('Apply button clicked for:', college.name);
-    console.log('User:', user);
-    console.log('Profile:', profile);
 
     if (!user) {
       toast({
@@ -66,92 +66,47 @@ const PrivateCollegeCard = ({ college, onFavorite }: PrivateCollegeCardProps) =>
       return;
     }
 
-    // Store application attempt in localStorage for tracking
-    const applicationData = {
-      collegeId: college.id,
-      collegeName: college.name,
-      appliedAt: new Date().toISOString(),
-      userEmail: profile.email,
-      status: 'applied'
-    };
-    
-    const existingApplications = JSON.parse(localStorage.getItem('college_applications') || '[]');
-    existingApplications.push(applicationData);
-    localStorage.setItem('college_applications', JSON.stringify(existingApplications));
-
-    // Generate pre-filled email message with profile data
-    const subject = `Admission Enquiry from ${profile.full_name} via Collzy`;
-    const body = `Dear ${college.name} Admissions Team,
-
-I hope this email finds you well. I am ${profile.full_name}, and I came across your esteemed institution through the Collzy platform. I am very interested in applying for admission and would like to request detailed information about your programs.
-
-My Profile Details:
-• Name: ${profile.full_name}
-• Email: ${profile.email}
-• Phone: ${profile.phone || 'Not provided'}
-• State: ${profile.state || 'Not provided'}
-• 12th Grade Marks: ${profile.marks || 'Not provided'}
-• Course Interest: ${profile.course_interest || 'Not provided'}
-
-I would be grateful if you could provide me with information about:
-
-📚 Course Details:
-- Available programs and specializations
-- Eligibility criteria and prerequisites
-- Duration and curriculum structure
-
-💰 Fee Structure:
-- Tuition fees (semester/annual)
-- Additional charges (lab, library, sports, etc.)
-- Payment schedule and scholarship opportunities
-
-📅 Admission Process:
-- Application deadlines and procedure
-- Entrance exams (if any)
-- Required documents and selection criteria
-
-🏠 Accommodation:
-- Hostel facilities and availability
-- Accommodation fees and room types
-
-🎯 Additional Information:
-- Campus facilities and infrastructure
-- Placement opportunities and statistics
-- Student life and extracurricular activities
-
-You can also view my complete profile and verify my details through the Collzy platform.
-
-I am very enthusiastic about the prospect of joining your institution and would appreciate a prompt response. Please let me know if you need any additional information from my side.
-
-Thank you for your time and consideration.
-
-Best regards,
-${profile.full_name}
-Email: ${profile.email}
-Phone: ${profile.phone || 'Not provided'}
-
----
-This inquiry was sent through Collzy - India's leading college discovery platform.
-Contact us: collzy.info@gmail.com | WhatsApp: +91 8129913205
-Location: Kasargod, Kerala`;
-
     try {
-      const mailtoUrl = `mailto:${college.admission_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      window.location.href = mailtoUrl;
-
-      // Store successful email attempt
-      document.cookie = `last_application=${college.name}; max-age=${60*60*24*7}; path=/`;
-      
-      toast({
-        title: "🎉 Application email opened!",
-        description: "Your email client has opened with a pre-filled message. Please send the email to complete your application!",
-        duration: 6000,
+      const emailData = generateApplicationEmail(profile, { 
+        name: college.name, 
+        admission_email: college.admission_email 
       });
-    } catch (error) {
+      
+      // Try Gmail first, then fallback to default email
+      try {
+        openGmailCompose(emailData);
+        toast({
+          title: "🎉 Gmail Opened!",
+          description: "Gmail compose window opened with your application email ready to send!",
+          duration: 5000,
+        });
+      } catch (error) {
+        openDefaultEmail(emailData);
+        toast({
+          title: "📧 Email Client Opened!",
+          description: "Your default email client opened with the application ready to send!",
+          duration: 5000,
+        });
+      }
+
+      // Store application attempt
+      const applicationData = {
+        collegeId: college.id,
+        collegeName: college.name,
+        appliedAt: new Date().toISOString(),
+        userEmail: profile.email,
+        status: 'applied'
+      };
+      
+      const existingApplications = JSON.parse(localStorage.getItem('college_applications') || '[]');
+      existingApplications.push(applicationData);
+      localStorage.setItem('college_applications', JSON.stringify(existingApplications));
+
+    } catch (error: any) {
       console.error('Error opening email:', error);
       toast({
-        title: "Error Opening Email",
-        description: "Please copy the college email and send manually: " + college.admission_email,
+        title: "Error",
+        description: error.message || "Failed to open email client. Please try again.",
         variant: "destructive",
       });
     }
@@ -162,7 +117,6 @@ Location: Kasargod, Kerala`;
     setIsFavorited(newFavoriteState);
     onFavorite?.(college.id, newFavoriteState);
     
-    // Store favorites in localStorage with expiry
     const favorites = JSON.parse(localStorage.getItem('favorite_colleges') || '[]');
     if (newFavoriteState) {
       favorites.push({
@@ -175,32 +129,29 @@ Location: Kasargod, Kerala`;
       if (index > -1) favorites.splice(index, 1);
     }
     localStorage.setItem('favorite_colleges', JSON.stringify(favorites));
-    document.cookie = `favorite_count=${favorites.length}; max-age=${60*60*24*365}; path=/`;
   };
 
   const handleWebsite = () => {
     if (college.website) {
       try {
-        const url = college.website.startsWith('http') ? college.website : `https://${college.website}`;
-        window.open(url, '_blank');
+        let url = college.website.trim();
         
-        // Track website visits
-        const visits = JSON.parse(localStorage.getItem('website_visits') || '[]');
-        visits.push({
-          collegeId: college.id,
-          collegeName: college.name,
-          visitedAt: new Date().toISOString()
-        });
-        localStorage.setItem('website_visits', JSON.stringify(visits));
+        // Add protocol if missing
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          url = `https://${url}`;
+        }
+        
+        window.open(url, '_blank', 'noopener,noreferrer');
         
         toast({
           title: "Opening Website",
           description: "College website is opening in a new tab.",
         });
       } catch (error) {
+        console.error('Website error:', error);
         toast({
           title: "Website Error",
-          description: "Please visit the website manually: " + college.website,
+          description: "Unable to open website. Please check the URL manually.",
           variant: "destructive",
         });
       }
@@ -217,16 +168,6 @@ Location: Kasargod, Kerala`;
     if (college.phone) {
       try {
         window.location.href = `tel:${college.phone}`;
-        
-        // Track call attempts
-        const calls = JSON.parse(localStorage.getItem('call_attempts') || '[]');
-        calls.push({
-          collegeId: college.id,
-          collegeName: college.name,
-          calledAt: new Date().toISOString()
-        });
-        localStorage.setItem('call_attempts', JSON.stringify(calls));
-        
         toast({
           title: "Opening Phone App",
           description: `Calling ${college.name}...`,

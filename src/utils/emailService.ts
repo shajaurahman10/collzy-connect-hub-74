@@ -16,10 +16,12 @@ interface StudentProfile {
 
 interface College {
   name: string;
-  email: string;
+  email?: string;
+  admission_email?: string;
 }
 
 export const generateApplicationEmail = (student: StudentProfile, college: College): EmailData => {
+  const collegeEmail = college.admission_email || college.email || '';
   const subject = `Admission Enquiry via Collzy - ${student.full_name}`;
   
   const body = `Dear ${college.name} Admissions Team,
@@ -29,10 +31,10 @@ I hope this email finds you well. I am ${student.full_name}, and I came across y
 My Profile Details:
 • Name: ${student.full_name}
 • Email: ${student.email}
-• Phone: ${student.phone}
-• State: ${student.state}
-• 12th Grade Marks: ${student.marks}
-• Course Interest: ${student.course_interest}
+• Phone: ${student.phone || 'Not provided'}
+• State: ${student.state || 'Not provided'}
+• 12th Grade Marks: ${student.marks || 'Not provided'}
+• Course Interest: ${student.course_interest || 'Not provided'}
 
 I would be grateful if you could provide me with information about:
 
@@ -60,8 +62,6 @@ I would be grateful if you could provide me with information about:
 - Placement opportunities and statistics
 - Student life and extracurricular activities
 
-You can also view my complete profile and verify my details through the Collzy platform: https://forms.gle/Cp2G5Lm5sNFe8eJu6
-
 I am very enthusiastic about the prospect of joining your institution and would appreciate a prompt response. Please let me know if you need any additional information from my side.
 
 Thank you for your time and consideration.
@@ -69,14 +69,14 @@ Thank you for your time and consideration.
 Best regards,
 ${student.full_name}
 Email: ${student.email}
-Phone: ${student.phone}
+Phone: ${student.phone || 'Not provided'}
 
 ---
 This inquiry was sent through Collzy - India's leading college discovery platform.
-Visit: www.collzy.com`;
+Contact us: collzy.info@gmail.com | WhatsApp: +91 8129913205`;
 
   return {
-    to: college.email,
+    to: collegeEmail,
     subject,
     body
   };
@@ -85,9 +85,25 @@ Visit: www.collzy.com`;
 export const openGmailCompose = (emailData: EmailData) => {
   const { to, subject, body } = emailData;
   
+  if (!to) {
+    throw new Error('No email address available');
+  }
+  
   // Create Gmail compose URL
   const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   
   // Open in new tab
   window.open(gmailUrl, '_blank');
+};
+
+export const openDefaultEmail = (emailData: EmailData) => {
+  const { to, subject, body } = emailData;
+  
+  if (!to) {
+    throw new Error('No email address available');
+  }
+  
+  // Fallback to mailto
+  const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailtoUrl;
 };

@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
+import { generateApplicationEmail, openGmailCompose, openDefaultEmail } from '@/utils/emailService';
 
 interface CollegeCardProps {
   college: {
@@ -66,8 +68,6 @@ const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
 
   const handleApplyClick = () => {
     console.log('Apply button clicked for:', college.name);
-    console.log('User:', user);
-    console.log('Profile:', profile);
 
     if (!user) {
       toast({
@@ -98,64 +98,26 @@ const CollegeCard = ({ college, onApply, onFavorite }: CollegeCardProps) => {
       return;
     }
 
-    // Generate application email with profile data
-    const subject = `Admission Enquiry from ${profile.full_name} via Collzy`;
-    const body = `Dear ${college.name} Admissions Team,
-
-I hope this email finds you well. I am ${profile.full_name}, and I came across your esteemed institution through the Collzy platform. I am very interested in applying for admission and would like to request detailed information about your programs.
-
-My Profile Details:
-• Name: ${profile.full_name}
-• Email: ${profile.email}
-• Phone: ${profile.phone || 'Not provided'}
-• State: ${profile.state || 'Not provided'}
-• 12th Grade Marks: ${profile.marks || 'Not provided'}
-• Course Interest: ${profile.course_interest || 'Not provided'}
-
-I would be grateful if you could provide me with information about:
-
-📚 Course Details:
-- Available programs and specializations
-- Eligibility criteria and prerequisites
-- Duration and curriculum structure
-
-💰 Fee Structure:
-- Tuition fees (semester/annual)
-- Additional charges (lab, library, sports, etc.)
-- Payment schedule and scholarship opportunities
-
-📅 Admission Process:
-- Application deadlines and procedure
-- Entrance exams (if any)
-- Required documents and selection criteria
-
-🏠 Accommodation:
-- Hostel facilities and availability
-- Accommodation fees and room types
-
-🎯 Additional Information:
-- Campus facilities and infrastructure
-- Placement opportunities and statistics
-- Student life and extracurricular activities
-
-I am very enthusiastic about the prospect of joining your institution and would appreciate a prompt response. Please let me know if you need any additional information from my side.
-
-Thank you for your time and consideration.
-
-Best regards,
-${profile.full_name}
-Email: ${profile.email}
-Phone: ${profile.phone || 'Not provided'}
-
----
-This inquiry was sent through Collzy - India's leading college discovery platform.
-Contact us: collzy.info@gmail.com | WhatsApp: +91 8129913205
-Location: Kasargod, Kerala`;
-
     try {
-      const mailtoLink = `mailto:${college.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      window.location.href = mailtoLink;
+      const emailData = generateApplicationEmail(profile, college);
       
+      // Try Gmail first, then fallback to default email
+      try {
+        openGmailCompose(emailData);
+        toast({
+          title: "🎉 Gmail Opened!",
+          description: "Gmail compose window opened with your application email ready to send!",
+          duration: 5000,
+        });
+      } catch (error) {
+        openDefaultEmail(emailData);
+        toast({
+          title: "📧 Email Client Opened!",
+          description: "Your default email client opened with the application ready to send!",
+          duration: 5000,
+        });
+      }
+
       // Store application attempt
       const applications = JSON.parse(localStorage.getItem('college_applications') || '[]');
       applications.push({
@@ -167,15 +129,11 @@ Location: Kasargod, Kerala`;
       });
       localStorage.setItem('college_applications', JSON.stringify(applications));
       
+    } catch (error: any) {
+      console.error('Email error:', error);
       toast({
-        title: "🎉 Application Email Opened!",
-        description: "Your email application has been prepared. Please send the email to complete your application!",
-        duration: 6000,
-      });
-    } catch (error) {
-      toast({
-        title: "Error Opening Email",
-        description: "Please copy the college email and send manually: " + college.email,
+        title: "Error",
+        description: error.message || "Failed to open email client. Please try again.",
         variant: "destructive",
       });
     }
@@ -208,16 +166,23 @@ Location: Kasargod, Kerala`;
   const handleWebsiteClick = () => {
     if (college.website) {
       try {
-        const url = college.website.startsWith('http') ? college.website : `https://${college.website}`;
-        window.open(url, '_blank');
+        let url = college.website.trim();
+        
+        // Add protocol if missing
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          url = `https://${url}`;
+        }
+        
+        window.open(url, '_blank', 'noopener,noreferrer');
         toast({
           title: "Opening Website",
           description: "College website is opening in a new tab.",
         });
       } catch (error) {
+        console.error('Website error:', error);
         toast({
           title: "Website Error",
-          description: "Please visit the website manually: " + college.website,
+          description: "Unable to open website. Please check the URL manually.",
           variant: "destructive",
         });
       }
@@ -271,29 +236,6 @@ Visit: www.collzy.com`;
       toast({
         title: "Email Unavailable",
         description: "No email address available for this college.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleMoreInfoClick = () => {
-    if (college.brochure) {
-      window.open(college.brochure, '_blank');
-      toast({
-        title: "Opening Brochure",
-        description: "College brochure is opening in a new tab.",
-      });
-    } else if (college.website) {
-      const url = college.website.startsWith('http') ? college.website : `https://${college.website}`;
-      window.open(url, '_blank');
-      toast({
-        title: "Opening Website",
-        description: "College website is opening in a new tab.",
-      });
-    } else {
-      toast({
-        title: "Information Unavailable",
-        description: "No additional information available.",
         variant: "destructive",
       });
     }
@@ -372,6 +314,7 @@ Visit: www.collzy.com`;
           <Button 
             variant="outline" 
             onClick={handleWebsiteClick}
+            disabled={!college.website}
             className="h-14 border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-sm hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center p-2"
           >
             <Globe className="h-4 w-4 mb-1" />
@@ -381,6 +324,7 @@ Visit: www.collzy.com`;
           <Button 
             variant="outline" 
             onClick={handleCallClick}
+            disabled={!college.phone}
             className="h-14 border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-sm hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center p-2"
           >
             <Phone className="h-4 w-4 mb-1" />
@@ -390,6 +334,7 @@ Visit: www.collzy.com`;
           <Button 
             variant="outline" 
             onClick={handleEmailClick}
+            disabled={!college.email}
             className="h-14 border-gray-200 hover:border-orange-300 hover:bg-orange-50 text-sm hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center p-2"
           >
             <FileText className="h-4 w-4 mb-1" />
